@@ -18,10 +18,10 @@ Our product, Lost Grenadiers, is a webapp GPS tool meant for incoming and establ
 > Technical Feasibility: Will the proposed system perform to the required specification? Outline technical systems options you propose to use, which will give a technical solution satisfying the requirements and constraints of the system, as outlined in the terms of reference.
 
 1. Platforms and Technologies
-- Web frontend: HTML, CSS, JS
+- Web frontend: HTML, CSS, JS, Leaflet.js
 - Backend: Python/Flask
 - Database: MySQL
-- Mapping/GPS: TODO
+- Mapping/GPS: Geolocation API, Device Orientation API
 
 2. Hardware and Software Requirements   
 - A device with navigation capabilities
@@ -65,10 +65,11 @@ The simple and friendly UI, clear instructions, and promotion of the system thro
 - Improves campus experience for students, implying better satisfaction
 - Provides management with data about building usage or traffic patterns
 
-3. Cost/Benefit Analysis
-- Estimated total costs: TODO
-- Value of benefits: TODO
-- Payback Period: TODO
+### 3. Cost/Benefit Analysis
+- Estimated total costs: Minimal, since the app will be hosted on a personal server. Main costs include development time (student/in-house labor) and optional domain/SSL (~$12–$20/year). All core software (Leaflet.js, Geolocation API, Device Orientation API) is free.
+- Value of benefits: Significant time savings for students and staff navigating the campus, improved accessibility for new visitors, reduced reliance on printed maps or staff directions, and potential data insights for campus planning. Even conservative estimates of time saved suggest benefits far exceed costs.
+- Payback Period: Essentially immediate; benefits begin accruing as soon as the app is used, with the first few days of active use outweighing the minimal costs.
+
 
 ## Market Research
 > Market Research: A comprehensive market research identifying a need for the product. Detail all market research you carried out, listing sources of information. Justify any conclusions you have drawn from your research. Identify the potential customer base for your product, together with evidence of customer need for the product. Describe how you propose to compete with similar products on the market.
