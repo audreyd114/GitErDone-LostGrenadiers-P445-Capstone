@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Lost Grenadiers</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+    <style>
+        /* Mobile-first responsive layout */
+        :root{
+            --header-h:56px;
+            --accent: #990000;
+            --muted:#6b7280;
+            --card-bg: #edebeb;
+            --glass: rgba(255,255,255,0.85);
+            font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+        }
+        html,body,#app{height:100%;margin:0;padding:0;background:#f7fafc}
+
+        header{
+            height:var(--header-h);
+            display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #e6e9ef;background:var(--card-bg);
+            position:relative;z-index:1000;
+        }
+        .logo{font-weight:700;color:var(--accent);letter-spacing:0.5px}
+        .search-wrap{flex:1;display:flex;align-items:center;gap:6px}
+        input[type="search"]{flex:1;padding:10px;border-radius:8px;border:1px solid #e2e8f0;font-size:15px}
+        button{background:var(--accent);color:white;border:none;padding:8px 12px;border-radius:8px;font-weight:600}
+
+        main{display:flex;flex-direction:column;height:calc(100% - var(--header-h));}
+        #map{flex:1;min-height:200px}
+
+        /* Bottom card for routing / steps */
+        .panel{position: absolute;right:12px;bottom:12px;width:92%;max-width:420px;background:var(--glass);backdrop-filter: blur(6px);border-radius:12px;padding:10px;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
+        .panel h3{margin:0 0 6px 0;font-size:16px}
+        .route-steps{max-height:260px;overflow:auto}
+        .step{display:flex;gap:8px;align-items:flex-start;padding:8px 6px;border-radius:8px}
+        .step+ .step{border-top:1px dashed rgba(0,0,0,0.06)}
+
+        /* Floating controls */
+        .controls{position:absolute;left:12px;top:70px;z-index:1100;display:flex;flex-direction:column;gap:8px}
+        .control-btn{background:var(--card-bg);padding:8px;border-radius:8px;box-shadow:0 3px 8px rgba(0,0,0,0.06);border:1px solid #e6e9ef}
+
+        /* Small screens: panel stretches */
+        @media(min-width:720px){
+            main{flex-direction:row}
+            #map{flex:1}
+            .panel{width:360px;left:auto;right:12px;bottom:12px}
+        }
+
+        /* accessibility focus */
+        input:focus, button:focus{outline:3px solid rgba(59,130,246,0.25)}
+    </style>
+</head>
+<body>
+<div id="app">
+    <header>
+        <div class="logo">Lost Grenadiers</div>
+        <div class="search-wrap">
+            <input id="search" type="search" placeholder="Search building or room (e.g. LF 119)" aria-label="Search building or room" />
+            <button id="searchBtn" aria-label="Search">Go</button>
+        </div>
+        <button id="locateBtn" title="Center map on your location">Locate</button>
+    </header>
+
+    <main>
+        <div id="map" role="application" aria-label="Campus map"></div>
+
+        <div class="controls" aria-hidden="false">
+            <div class="control-btn" id="toggleIndoor">Indoor: Off</div>
+            <div class="control-btn" id="followToggle">Follow: Off</div>
+        </div>
+
+        <aside class="panel" id="routingPanel" aria-live="polite">
+            <h3>Route</h3>
+            <div id="routeSummary">No route loaded. Search for a building to begin.</div>
+            <div class="route-steps" id="steps" hidden></div>
+            <div style="display:flex;gap:8px;margin-top:8px">
+                <button id="clearBtn">Clear</button>
+                <button id="mockRouteBtn">Mock route</button>
+            </div>
+        </aside>
+    </main>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+    // Basic map + UI skeleton for Lost Grenadiers
+    // This file is intentionally dependency-light. When backend and routing libs are ready:
+    //  - Replace mockRoute() with a call to the backend /api/route
+    //  - Optionally add leaflet-routing-machine or pgrouting-based tile/layer
+
+    const map = L.map('map', {zoomControl:true}).setView([38.2549, -85.7594], 16); // sample coords (IUS)
+
+    // OpenStreetMap baselayer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+        maxZoom: 20,
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Layers for indoor/outdoor
+    const indoorLayer = L.layerGroup();
+    const outdoorLayer = L.layerGroup().addTo(map);
+
+    // Example building markers (replace with real building geometry fetched from server)
+    const buildings = [
+        {id:'LF', name:'Life Sciences', coords:[38.34304, -85.81675]},
+        {id:'PS', name:'Physical Sciences', coords:[38.3434606, -85.8181217]},
+        {id:'LIB', name:'Library', coords:[38.34377, -85.82090]}
+    ];
+
+    buildings.forEach(b=>{
+        const m = L.marker(b.coords).bindPopup(`<strong>${b.name}</strong><br/>${b.id}`);
+        m.addTo(outdoorLayer);
+    });
+
+    // User position marker and heading
+    let userMarker = null;
+    let userHeading = null;
+    let follow = false;
+
+    function onLocationFound(e){
+        const latlng = e.latlng;
+        if(!userMarker){
+            userMarker = L.marker(latlng, {rotationAngle:0}).addTo(map).bindPopup('You are here');
+        } else {
+            userMarker.setLatLng(latlng);
+        }
+        if(follow){ map.setView(latlng); }
+    }
+
+    function onLocationError(e){
+        console.warn('Geolocation error', e.message);
+    }
+
+    map.on('locationfound', onLocationFound);
+    map.on('locationerror', onLocationError);
+
+    // Use browser geolocation watch
+    let watchId = null;
+    function startWatchingPosition(){
+        if('geolocation' in navigator){
+            watchId = navigator.geolocation.watchPosition(pos=>{
+                const latlng = L.latLng(pos.coords.latitude, pos.coords.longitude);
+                onLocationFound({latlng});
+            }, err=>console.warn('watchPosition error',err), {enableHighAccuracy:true, maximumAge:2000, timeout:5000});
+        }
+    }
+    function stopWatchingPosition(){ if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; }}
+
+    // Device orientation: rotate heading indicator
+    if(window.DeviceOrientationEvent){
+        window.addEventListener('deviceorientationabsolute', handleOrientation, true);
+        window.addEventListener('deviceorientation', handleOrientation, true);
+    }
+    function handleOrientation(ev){
+        const alpha = ev.alpha; // degrees
+        if(userMarker && typeof alpha === 'number'){
+            // Heading available — rotate marker icon if using plugin, or set a simple heading
+            // This is a placeholder: replace with a rotated icon for production.
+            userHeading = alpha;
+        }
+    }
+
+    // Simple UI controls
+    document.getElementById('locateBtn').addEventListener('click', ()=>{
+        if(!watchId) { startWatchingPosition(); document.getElementById('locateBtn').textContent = 'Locating...'; }
+        map.locate({setView:true, maxZoom:18});
+    });
+
+    document.getElementById('toggleIndoor').addEventListener('click', (e)=>{
+        const btn = e.currentTarget;
+        const on = btn.textContent.includes('Off');
+        if(on){
+            btn.textContent = 'Indoor: On';
+            indoorLayer.addTo(map);
+            // TODO: fetch and display indoor floor layers
+        } else {
+            btn.textContent = 'Indoor: Off';
+            indoorLayer.remove();
+        }
+    });
+
+    document.getElementById('followToggle').addEventListener('click', (e)=>{
+        follow = !follow;
+        e.currentTarget.textContent = follow ? 'Follow: On' : 'Follow: Off';
+    });
+
+    // Search handling (very simple client-side demo)
+    const searchInput = document.getElementById('search');
+    document.getElementById('searchBtn').addEventListener('click', ()=>{
+        const q = searchInput.value.trim();
+        if(!q) return;
+        // For now, try to match building code or name from sample dataset
+        const found = buildings.find(b=> (b.id && b.id.toLowerCase()===q.toLowerCase()) || b.name.toLowerCase().includes(q.toLowerCase()));
+        if(found){
+            map.setView(found.coords, 19);
+            L.popup().setLatLng(found.coords).setContent(`<strong>${found.name}</strong><br/>${found.id}`).openOn(map);
+            // Request route from user's current position to building
+            if(userMarker){
+                const userLatLng = userMarker.getLatLng();
+                requestRoute([userLatLng.lat, userLatLng.lng], found.coords);
+            } else {
+                // no user position yet - draw mock route from center
+                requestRoute(map.getCenter(), found.coords);
+            }
+        } else {
+            alert('No building found in the sample dataset.');
+        }
+    });
+
+    // Simple mock route (replace with backend call)
+    let routeLayer = null;
+    function requestRoute(from, to){
+        // Replace this fetch with the backend route API when ready:
+        // fetch(`/api/route?from=${from[0]},${from[1]}&to=${to[0]},${to[1]}`)
+        //   .then(r=>r.json()).then(drawRoute)
+
+        // For now use mock route: straight polyline
+        const mock = [from, interpolateMidpoint(from,to,0.4), to];
+        drawRoute({geometry: mock, steps:[
+                {text:'Head north for 50m'},
+                {text:'Turn right at the fountain'},
+                {text:`Arrive at ${to[0].toFixed(5)}, ${to[1].toFixed(5)}`}
+            ]});
+    }
+
+    function drawRoute(route){
+        if(routeLayer) routeLayer.remove();
+        routeLayer = L.polyline(route.geometry, {weight:6}).addTo(map);
+        document.getElementById('routeSummary').textContent = 'Route loaded — follow the steps below.';
+        const steps = document.getElementById('steps');
+        steps.hidden = false; steps.innerHTML = '';
+        route.steps.forEach((s,i)=>{
+            const el = document.createElement('div'); el.className='step';
+            el.innerHTML = `<div style="font-weight:600;min-width:22px">${i+1}</div><div>${s.text}</div>`;
+            steps.appendChild(el);
+        });
+        // zoom to fit
+        map.fitBounds(routeLayer.getBounds(), {padding:[40,40]});
+    }
+
+    function interpolateMidpoint(a,b,t=0.5){
+        return [(1-t)*a[0]+t*b[0], (1-t)*a[1]+t*b[1]];
+    }
+
+    document.getElementById('clearBtn').addEventListener('click', ()=>{
+        if(routeLayer) routeLayer.remove();
+        document.getElementById('routeSummary').textContent = 'No route loaded. Search for a building to begin.';
+        document.getElementById('steps').hidden = true;
+    });
+
+    document.getElementById('mockRouteBtn').addEventListener('click', ()=>{
+        const from = map.getCenter();
+        const to = [from.lat + 0.0025, from.lng + 0.0025];
+        requestRoute([from.lat, from.lng], to);
+    });
+
+    // Accessibility: keyboard shortcut (f) to locate
+    window.addEventListener('keydown', (e)=>{
+        if(e.key === 'f'){
+            document.getElementById('locateBtn').click();
+        }
+    });
+
+    // On load: show a small welcome popup
+    setTimeout(()=>{
+        L.popup({autoClose:true,closeOnClick:true}).setLatLng(map.getCenter())
+            .setContent('<strong>Welcome</strong><br/>Search for buildings or press Locate to center on your device.')
+            .openOn(map);
+    },800);
+
+    // Notes for backend integration points:
+    //  - Replace 'buildings' dataset with an API call to /api/buildings (GET) that returns ids, names, and coordinates.
+    //  - Implement /api/route (POST or GET) to return a JSON object like: {geometry: [[lat,lng],...], steps:[{text:...}, ...]}
+    //  - Indoor floor plans should be delivered as tiled layers or GeoJSON polygons (use LayerGroup for floors).
+
+</script>
+</body>
+</html>
