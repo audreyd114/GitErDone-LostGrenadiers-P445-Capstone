@@ -43,6 +43,8 @@
         .controls{position:absolute;left:12px;top:70px;z-index:1100;display:flex;flex-direction:column;gap:8px}
         .control-btn{background:var(--card-bg);padding:8px;border-radius:8px;box-shadow:0 3px 8px rgba(0,0,0,0.06);border:1px solid #e6e9ef}
 
+
+
         /* Small screens: panel stretches */
         @media(min-width:720px){
             main{flex-direction:row}
@@ -52,6 +54,34 @@
 
         /* accessibility focus */
         input:focus, button:focus{outline:3px solid rgba(59,130,246,0.25)}
+
+        /* Indoor/Outdoor Toggle */
+        .indoor-toggle {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            z-index: 9999;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,.2);
+            padding: 6px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .indoor-toggle button {
+            padding: 6px 10px;
+            border: none;
+            border-radius: 6px;
+            background: #eee;
+            cursor: pointer;
+        }
+
+        .indoor-toggle button.active {
+            background: #d0d0ff;
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
@@ -71,6 +101,24 @@
         <div class="controls" aria-hidden="false">
             <div class="control-btn" id="toggleIndoor">Indoor: Off</div>
             <div class="control-btn" id="followToggle">Follow: Off</div>
+        </div>
+
+        <div id="floorSelector" style="
+            position:absolute;
+            left:12px;
+            top:130px;
+            z-index:1200;
+            background:white;
+            padding:6px;
+            border-radius:8px;
+            box-shadow:0 2px 6px rgba(0,0,0,.2);
+            display:none;
+">
+            <button data-floor="1">1F</button>
+            <button data-floor="2">2F</button>
+            <button data-floor="3">3F</button>
+            <button data-floor="3">4F</button>
+            <button data-floor="3">5F</button>
         </div>
 
         <aside class="panel" id="routingPanel" aria-live="polite">
@@ -272,6 +320,81 @@
             .setContent('<strong>Welcome</strong><br/>Search for buildings or press Locate to center on your device.')
             .openOn(map);
     },800);
+
+
+    // INDOOR MODE + FLOOR OVERLAYS
+    let indoorMode = false;
+    let currentFloor = null;
+    let currentBuilding = null;
+    let currentOverlay = null;
+
+    // TEMP demo bounds (fix when we get PNGs)
+    const TEMP_BOUNDS = [
+        [38.34300, -85.81720], // southwest
+        [38.34330, -85.81650]  // northeast
+    ];
+
+    // Replace this when we have real building floors
+    const buildingFloors = {
+        "LF": 3,
+        "PS": 2,
+        "LIB": 3
+    };
+
+    // Activate indoor mode
+    document.getElementById("toggleIndoor").addEventListener("click", () => {
+        indoorMode = !indoorMode;
+
+        if (indoorMode) {
+            document.getElementById("toggleIndoor").textContent = "Indoor: On";
+            document.getElementById("floorSelector").style.display = "block";
+        } else {
+            document.getElementById("toggleIndoor").textContent = "Indoor: Off";
+            document.getElementById("floorSelector").style.display = "none";
+            removeFloorOverlay();
+        }
+    });
+
+    // Handle floor buttons
+    document.querySelectorAll("#floorSelector button").forEach(btn => {
+        btn.addEventListener("click", () => {
+            if (!currentBuilding) {
+                alert("Select a building first (just click a marker).");
+                return;
+            }
+            currentFloor = parseInt(btn.dataset.floor);
+            loadFloorOverlay(currentBuilding, currentFloor);
+        });
+    });
+
+    // When the user taps a building marker, set indoor context
+    buildings.forEach(b => {
+        const m = L.marker(b.coords).addTo(map).on("click", () => {
+            currentBuilding = b.id;
+
+            if (indoorMode) {
+                currentFloor = 1;
+                loadFloorOverlay(currentBuilding, currentFloor);
+            }
+        });
+    });
+
+    // Load floor PNG (placeholder)
+    function loadFloorOverlay(buildingId, floorNum) {
+        removeFloorOverlay();
+        const url = `indoor/${buildingId}_floor${floorNum}.png`;
+
+        currentOverlay = L.imageOverlay(url, TEMP_BOUNDS).addTo(map);
+    }
+
+    // Remove overlay
+    function removeFloorOverlay() {
+        if (currentOverlay) {
+            map.removeLayer(currentOverlay);
+            currentOverlay = null;
+        }
+    }
+
 
     // Notes for backend integration points:
     //  - Replace 'buildings' dataset with an API call to /api/buildings (GET) that returns ids, names, and coordinates.
