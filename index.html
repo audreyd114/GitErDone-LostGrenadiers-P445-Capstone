@@ -32,8 +32,29 @@
         main{display:flex;flex-direction:column;height:calc(100% - var(--header-h));}
         #map{flex:1;min-height:200px}
 
+       /* #directions-box{
+            position: absolute;
+            bottom: 20px;
+            background: white;
+            padding: 12px 16px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            z-index: 9999;
+            max-width: 280px;
+        }*/
+
         /* Bottom card for routing / steps */
-        .panel{position: absolute;right:12px;bottom:12px;width:92%;max-width:420px;background:var(--glass);backdrop-filter: blur(6px);border-radius:12px;padding:10px;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
+        .panel{position: absolute;
+            right:12px;
+            bottom:12px;
+            width:92%;
+            max-width:420px;
+            background:var(--glass);
+            backdrop-filter: blur(6px);
+            border-radius:12px;
+            padding:10px;
+            box-shadow:0 6px 20px rgba(0,0,0,0.08);
+            z-index: 99999;}
         .panel h3{margin:0 0 6px 0;font-size:16px}
         .route-steps{max-height:260px;overflow:auto}
         .step{display:flex;gap:8px;align-items:flex-start;padding:8px 6px;border-radius:8px}
@@ -141,7 +162,7 @@
     //  - Replace mockRoute() with a call to the backend /api/route
     //  - Optionally add leaflet-routing-machine or pgrouting-based tile/layer
 
-    const map = L.map('map', {zoomControl:true}).setView([38.2549, -85.7594], 16); // sample coords (IUS)
+    const map = L.map('map', {zoomControl:true}).setView([38.34505, -85.81951], 17); // IUS
 
     // OpenStreetMap baselayer
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
@@ -155,9 +176,15 @@
 
     // Example building markers (replace with real building geometry fetched from server)
     const buildings = [
-        {id:'LF', name:'Life Sciences', coords:[38.34304, -85.81675]},
+        {id:'LF', name:'Life Sciences', coords:[38.34301, -85.81912]},
         {id:'PS', name:'Physical Sciences', coords:[38.3434606, -85.8181217]},
-        {id:'LIB', name:'Library', coords:[38.34377, -85.82090]}
+        {id:'LIB', name:'Library', coords:[38.34377, -85.82090]},
+        {id:'CV', name:'Crestview Hall', coords:[38.34358, -85.81991]},
+        {id:'HH', name:'Hillside Hall', coords:[38.34440, -85.82050]},
+        {id:'US', name:'University Center South', coords:[38.34514, -85.82013]},
+        {id:'UC', name:'University Center North', coords:[38.34555, -85.82006]},
+        {id:'KV', name:'Knobview Hall', coords:[38.34685, -85.81984]},
+        {id:'OG', name:'Ogle Center', coords:[38.34716, -85.81919]}
     ];
 
     buildings.forEach(b=>{
@@ -317,7 +344,7 @@
     // On load: show a small welcome popup
     setTimeout(()=>{
         L.popup({autoClose:true,closeOnClick:true}).setLatLng(map.getCenter())
-            .setContent('<strong>Welcome</strong><br/>Search for buildings or press Locate to center on your device.')
+            .setContent('<strong>Welcome!</strong><br/>Search for buildings or press "Locate" to center on your device.')
             .openOn(map);
     },800);
 
