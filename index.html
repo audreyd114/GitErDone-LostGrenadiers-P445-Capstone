@@ -103,6 +103,72 @@
             font-weight: bold;
         }
 
+        #indoorOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+        }
+
+        #indoorBackdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(2px);
+        }
+
+        #indoorWindow {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        #indoorImage {
+            width: 100%;
+            height: auto;
+            max-height: 80vh;
+            object-fit: contain;
+        }
+
+        .closeBtn {
+            position: absolute;
+            right: 10px;
+            top: 6px;
+            background: transparent;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+        }
+
+        #closeIndoor {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            z-index: 999999;      /* bring it above EVERYTHING in the popup */
+            background: rgba(0,0,0,0.4);
+            color: white;
+            border: none;
+            font-size: 22px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        #indoorWindow {
+            position: relative;    /* required so “absolute” in the button works */
+        }
+
+
     </style>
 </head>
 <body>
@@ -141,6 +207,22 @@
             <button data-floor="3">4F</button>
             <button data-floor="3">5F</button>
         </div>
+
+        <div id="indoorOverlay" hidden>
+            <div id="indoorBackdrop"></div>
+
+            <div id="indoorWindow">
+                <button id="closeIndoor" class="closeBtn">x</button>
+
+                <div id="indoorHeader">
+                    <h2 id="indoorTitle">Building Name</h2>
+                    <select id="floorSelect"></select>
+                </div>
+
+                <img id="indoorImage" src="" alt="Floor Plan">
+            </div>
+        </div>
+
 
         <aside class="panel" id="routingPanel" aria-live="polite">
             <h3>Route</h3>
@@ -186,11 +268,32 @@
         {id:'KV', name:'Knobview Hall', coords:[38.34685, -85.81984]},
         {id:'OG', name:'Ogle Center', coords:[38.34716, -85.81919]}
     ];
-
+/*
     buildings.forEach(b=>{
         const m = L.marker(b.coords).bindPopup(`<strong>${b.name}</strong><br/>${b.id}`);
         m.addTo(outdoorLayer);
     });
+*/
+    buildings.forEach(b => {
+        const m = L.marker(b.coords)
+            .addTo(outdoorLayer)
+            .on("click", () => {
+
+                if (!indoorMode) return;
+
+                // indoor mode is ON → allow popup
+                openIndoorView(
+                    {
+                        name: b.name,
+                        code: b.id,
+                        floors: buildingFloors[b.id] || 1
+                    },
+                    1
+                );
+            });
+    });
+
+
 
     // User position marker and heading
     let userMarker = null;
@@ -393,9 +496,25 @@
             loadFloorOverlay(currentBuilding, currentFloor);
         });
     });
+/*
+    buildings.forEach(b => {
+        const m = L.marker(b.coords).addTo(map).on("click", () => {
+
+            // Always open your new popup window
+            openIndoorView(
+                {
+                    name: b.name,
+                    code: b.id,
+                    floors: buildingFloors[b.id] || 1
+                },
+                1
+            );
+        });
+    });
+*/
 
     // When the user taps a building marker, set indoor context
-    buildings.forEach(b => {
+   /* buildings.forEach(b => {
         const m = L.marker(b.coords).addTo(map).on("click", () => {
             currentBuilding = b.id;
 
@@ -404,10 +523,10 @@
                 loadFloorOverlay(currentBuilding, currentFloor);
             }
         });
-    });
+    });*/
 
     // Load floor PNG (placeholder)
-    function loadFloorOverlay(buildingId, floorNum) {
+   /* function loadFloorOverlay(buildingId, floorNum) {
         removeFloorOverlay();
         const url = `indoor/${buildingId}_floor${floorNum}.png`;
 
@@ -420,7 +539,35 @@
             map.removeLayer(currentOverlay);
             currentOverlay = null;
         }
+    }*/
+    function openIndoorView(building, floor) {
+        document.getElementById("indoorTitle").textContent = building.name;
+
+        // Build floor dropdown
+        const select = document.getElementById("floorSelect");
+        select.innerHTML = "";
+        for (let f = 1; f <= building.floors; f++) {
+            const opt = document.createElement("option");
+            opt.value = f;
+            opt.textContent = "Floor " + f;
+            if (f === floor) opt.selected = true;
+            select.appendChild(opt);
+        }
+
+        // Load image
+        document.getElementById("indoorImage").src =
+            `/indoor/${building.code}_floor${floor}.png`;
+
+        document.getElementById("indoorOverlay").hidden = false;
+
+        // Update image when floor changes
+        select.onchange = () =>
+            openIndoorView(building, Number(select.value));
     }
+
+    document.getElementById("closeIndoor").onclick = () => {
+        document.getElementById("indoorOverlay").hidden = true;
+    };
 
 
     // Notes for backend integration points:
