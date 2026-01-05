@@ -1,0 +1,35 @@
+/*
+UI.css
+Controls
+*/
+
+/* Floating controls */
+.controls{position:absolute;left:12px;top:70px;z-index:1100;display:flex;flex-direction:column;gap:8px}
+.control-btn{background:var(--card-bg);padding:8px;border-radius:8px;box-shadow:0 3px 8px rgba(0,0,0,0.06);border:1px solid #e6e9ef}
+
+/* Indoor/Outdoor Toggle */
+.indoor-toggle {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    z-index: 9999;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    padding: 6px;
+    display: flex;
+    gap: 6px;
+}
+
+.indoor-toggle button {
+    padding: 6px 10px;
+    border: none;
+    border-radius: 6px;
+    background: #eee;
+    cursor: pointer;
+}
+
+.indoor-toggle button.active {
+    background: #d0d0ff;
+    font-weight: bold;
+}
