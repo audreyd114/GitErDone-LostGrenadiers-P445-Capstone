@@ -5,8 +5,19 @@ User interface controls like locate, follow, search, keyboard shortcuts, welcome
 
 // Simple UI controls
 document.getElementById('locateBtn').addEventListener('click', ()=>{
+
+    //iOS compass permission
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission().catch(console.warn);
+    }
+
     if(!watchId) { startWatchingPosition(); document.getElementById('locateBtn').textContent = 'Locating...'; }
-    map.locate({setView:true, maxZoom:18});
+
+    // center map on last known position if available
+    if (userMarker) {
+        map.setView(userMarker.getLatLng(), 18);
+    }
 });
 
 document.getElementById('followToggle').addEventListener('click', (e)=>{
