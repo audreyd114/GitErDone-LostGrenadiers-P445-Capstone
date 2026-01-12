@@ -18,12 +18,13 @@ Mobile-first responsive layout
 html,body,#app{height:100%;margin:0;padding:0;background:#f7fafc}
 
 header {
-    height: var(--header-h);
-    width: 100%;
+    height: auto;
+    min-height: var(--header-h);
 
+    width: 100%;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
 
     padding: 6px 8px;
     border-bottom: 1px solid #e6e9ef;
@@ -31,8 +32,6 @@ header {
 
     position: relative;
     z-index: 1000;
-
-    overflow: hidden;
 }
 
 header > * {
@@ -43,13 +42,9 @@ header > * {
     font-weight: 700;
     color: var(--accent);
     letter-spacing: 0.5px;
-
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 120px;
+    flex-shrink: 0;
 }
-
 
 .search-wrap {
     flex: 1;
