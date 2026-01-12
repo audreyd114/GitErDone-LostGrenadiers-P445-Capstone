@@ -74,7 +74,7 @@ function handleOrientation(ev){
     let heading = null;
 
     // iOS Safari
-    if ('webkitCompassHeading' in ev && typeof ev.webkitCompassHeading === 'number') {
+    if (typeof ev.webkitCompassHeading === 'number') {
         heading = ev.webkitCompassHeading;
     }
     // Android, Chrome, and others
@@ -82,12 +82,19 @@ function handleOrientation(ev){
         heading = 360 - ev.alpha;
     }
 
-    if(userMarker && heading !== null){
+    if (heading === null || !userMarker) return;
+
+    const arrow = userMarker.getElement()?.querySelector('.arrow');
+    if (!arrow) return;
+
+    arrow.style.transform = `rotate(${smoothHeading(heading)}deg)`;
+
+    /*if(userMarker && heading !== null){
         const arrow = userMarker.getElement()?.querySelector('.arrow');
         if(arrow){
             arrow.style.transform = `rotate(${smoothHeading(heading)}deg)`;
         }
-    }
+    }*/
 }
 
 let lastHeading = null;
