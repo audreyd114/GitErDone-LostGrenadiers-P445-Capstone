@@ -12,17 +12,35 @@ document.getElementById('locateBtn').addEventListener('click', ()=>{
         DeviceOrientationEvent.requestPermission().catch(console.warn);
     }
 
-    if(!watchId) { startWatchingPosition(); document.getElementById('locateBtn').textContent = 'Locating...'; }
+    document.getElementById('locateBtn').addEventListener('click', async ()=>{
+
+        // iOS compass permission
+        if (typeof DeviceOrientationEvent !== 'undefined' &&
+            typeof DeviceOrientationEvent.requestPermission === 'function') {
+            try {
+                const res = await DeviceOrientationEvent.requestPermission();
+                if (res !== 'granted') return;
+            } catch(e){
+                console.warn(e);
+            }
+        }
+
+        follow = true; // Always follow after selecting "Locate"
+
+        if (!watchId) {
+            startWatchingPosition();
+            document.getElementById('locateBtn').textContent = 'Locating…';
+        }
+
+        if (userMarker) {
+            map.setView(userMarker.getLatLng(), 18, { animate: true });
+        }
+    });
 
     // center map on last known position if available
     if (userMarker) {
         map.setView(userMarker.getLatLng(), 18);
     }
-});
-
-document.getElementById('followToggle').addEventListener('click', (e)=>{
-    follow = !follow;
-    e.currentTarget.textContent = follow ? 'Follow: On' : 'Follow: Off';
 });
 
 // Search handling (very simple client-side demo)

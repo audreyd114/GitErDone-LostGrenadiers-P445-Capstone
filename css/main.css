@@ -3,6 +3,10 @@ Main.css
 Mobile-first responsive layout
 */
 
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
 :root{
     --header-h:56px;
     --accent: #990000;
@@ -13,15 +17,66 @@ Mobile-first responsive layout
 }
 html,body,#app{height:100%;margin:0;padding:0;background:#f7fafc}
 
-header{
-    height:var(--header-h);
-    display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid #e6e9ef;background:var(--card-bg);
-    position:relative;z-index:1000;
+header {
+    height: auto;
+    min-height: var(--header-h);
+
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 6px 8px;
+    border-bottom: 1px solid #e6e9ef;
+    background: var(--card-bg);
+
+    position: relative;
+    z-index: 1000;
 }
-.logo{font-weight:700;color:var(--accent);letter-spacing:0.5px}
-.search-wrap{flex:1;display:flex;align-items:center;gap:6px}
-input[type="search"]{flex:1;padding:10px;border-radius:8px;border:1px solid #e2e8f0;font-size:15px}
-button{background:var(--accent);color:white;border:none;padding:8px 12px;border-radius:8px;font-weight:600}
+
+header > * {
+    min-width: 0;
+}
+
+.logo {
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.search-wrap {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+}
+
+input[type="search"] {
+    flex: 1;
+    min-width: 0;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    font-size: 14px;
+}
+
+header button {
+    padding: 6px 8px;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+button{
+    background:var(--accent);
+    color:white;
+    border:none;
+    padding:8px 12px;
+    border-radius:8px;
+    font-weight:600
+}
 
 main{display:flex;flex-direction:column;height:calc(100% - var(--header-h));}
 #map{flex:1;min-height:200px}
