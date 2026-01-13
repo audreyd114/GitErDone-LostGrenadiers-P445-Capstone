@@ -1,21 +1,120 @@
 /*
 Indoor.js
 All indoor/floor overlay logic and indoor UI.
-This file needs cleaning right now (11/24)
- */
+*/
 
 // INDOOR MODE + FLOOR OVERLAYS
 let indoorMode = false;
-let currentFloor = null;
+let currentFloor = 1;
+//let currentFloor = null;
 let currentBuilding = null;
 let currentOverlay = null;
 
-// TEMP demo bounds (fix when we get PNGs)
-const TEMP_BOUNDS = [
-    [38.34300, -85.81720], // southwest
-    [38.34330, -85.81650]  // northeast
-];
+// Southwest corner and Northeast corner
+const buildingFloorBounds = {
+    LF: {
+        1: [[38.342939, -85.819293], [38.343239,-85.818518]]
+    },
+    PS: {
 
+    },
+    LIB: {
+
+    },
+    CV: {
+
+    },
+    HH: {
+
+    },
+    US: {
+
+    },
+    UC: {
+
+    },
+    KV: {
+
+    },
+    OG: {
+
+    }
+};
+
+// Toggle indoor mode
+/*document.getElementById('toggleIndoor').addEventListener('click', () => {
+    indoorMode = !indoorMode;
+    if (!indoorMode && currentOverlay) {
+        map.removeLayer(currentOverlay);
+        currentOverlay = null;
+    }
+});*/
+
+// Select building
+buildings.forEach(b => {
+    L.marker(b.coords).addTo(map).on('click', () => {
+        if (!indoorMode) return;
+        currentBuilding = b.id;
+        currentFloor = 1;
+        loadFloorOverlay(currentBuilding, currentFloor);
+    });
+});
+
+// Floor selector
+document.getElementById('floorSelect').addEventListener('change', e => {
+    currentFloor = Number(e.target.value);
+    if (currentBuilding) loadFloorOverlay(currentBuilding, currentFloor);
+});
+
+function loadFloorOverlay(buildingId, floorNum) {
+    if (currentOverlay) map.removeLayer(currentOverlay);
+
+    const url = `/indoor/${buildingId}_floor${floorNum}.png`;
+    const bounds = buildingFloorBounds[buildingId][floorNum];
+
+    currentOverlay = L.imageOverlay(url, bounds, { opacity: 0.9 }).addTo(map);
+}
+
+// Activate indoor mode
+document.getElementById("toggleIndoor").addEventListener("click", () => {
+    indoorMode = !indoorMode;
+
+    if (indoorMode) {
+        document.getElementById("toggleIndoor").textContent = "Indoor: On";
+        document.getElementById("floorSelector").style.display = "block";
+    } else {
+        document.getElementById("toggleIndoor").textContent = "Indoor: Off";
+        document.getElementById("floorSelector").style.display = "none";
+        removeFloorOverlay();
+    }
+});
+
+// Handle floor buttons
+document.querySelectorAll("#floorSelector button").forEach(btn => {
+    btn.addEventListener("click", () => {
+        if (!currentBuilding) {
+            alert("Select a building first (just click a marker).");
+            return;
+        }
+        currentFloor = parseInt(btn.dataset.floor);
+        loadFloorOverlay(currentBuilding, currentFloor);
+    });
+});
+
+document.getElementById('toggleIndoor').addEventListener('click', (e)=>{
+    const btn = e.currentTarget;
+    const on = btn.textContent.includes('Off');
+    if(on){
+        btn.textContent = 'Indoor: On';
+        indoorLayer.addTo(map);
+        // TODO: fetch and display indoor floor layers
+    } else {
+        btn.textContent = 'Indoor: Off';
+        indoorLayer.remove();
+    }
+});
+
+/*
 // Replace this when we have real building floors
 const buildingFloors = {
     "LF": 3,
@@ -79,7 +178,7 @@ document.getElementById("closeIndoor").onclick = () => {
 };
 
 // When the user taps a building marker, set indoor context
-/* buildings.forEach(b => {
+buildings.forEach(b => {
      const m = L.marker(b.coords).addTo(map).on("click", () => {
          currentBuilding = b.id;
 
@@ -88,10 +187,10 @@ document.getElementById("closeIndoor").onclick = () => {
              loadFloorOverlay(currentBuilding, currentFloor);
          }
      });
- });*/
+ });
 
 // Load floor PNG (placeholder)
-/* function loadFloorOverlay(buildingId, floorNum) {
+function loadFloorOverlay(buildingId, floorNum) {
      removeFloorOverlay();
      const url = `indoor/${buildingId}_floor${floorNum}.png`;
 
@@ -104,9 +203,8 @@ document.getElementById("closeIndoor").onclick = () => {
          map.removeLayer(currentOverlay);
          currentOverlay = null;
      }
- }*/
+ }
 
-/*
 document.getElementById('toggleIndoor').addEventListener('click', (e)=>{
         const btn = e.currentTarget;
         const on = btn.textContent.includes('Off');
@@ -119,4 +217,4 @@ document.getElementById('toggleIndoor').addEventListener('click', (e)=>{
             indoorLayer.remove();
         }
     });
- */
+*/
