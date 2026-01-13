@@ -4,6 +4,43 @@ Utility/helper functions like position watching, orientation, etc.
  */
 
 function startWatchingPosition() {
+    if (!navigator.geolocation) {
+        console.warn('Geolocation not supported');
+        return;
+    }
+
+    watchId = navigator.geolocation.watchPosition(
+        pos => {
+            const latlng = L.latLng(
+                pos.coords.latitude,
+                pos.coords.longitude
+            );
+            onLocationFound({
+                latlng,
+                accuracy: pos.coords.accuracy
+            });
+        },
+        err => {
+            console.warn('watchPosition error', err);
+
+            if (err.code === err.PERMISSION_DENIED) {
+                alert(
+                    'Location access is disabled.\n\n' +
+                    'Enable it in:\n' +
+                    'Settings → Safari → Location → Allow'
+                );
+            }
+        },
+        {
+            enableHighAccuracy: true,
+            maximumAge: 100,
+            timeout: 10000
+        }
+    );
+}
+
+/*
+function startWatchingPosition() {
     if ('geolocation' in navigator) {
         watchId = navigator.geolocation.watchPosition(
             pos => {
@@ -27,7 +64,7 @@ function startWatchingPosition() {
         const fallback = L.latLng(38.34505, -85.81951);
         onLocationFound({ latlng: fallback, accuracy: 5 });
     }
-}
+}*/
 
 let accuracyCircle = null;
 
