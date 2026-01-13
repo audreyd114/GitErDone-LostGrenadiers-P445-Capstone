@@ -74,7 +74,7 @@ function handleOrientation(ev){
     let heading = null;
 
     // iOS Safari
-    if (typeof ev.webkitCompassHeading === 'number') {
+    if ('webkitCompassHeading' in ev && typeof ev.webkitCompassHeading === 'number') {
         heading = ev.webkitCompassHeading;
     }
     // Android, Chrome, and others
