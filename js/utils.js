@@ -27,7 +27,9 @@ function startWatchingPosition() {
                 alert(
                     'Location access is disabled.\n\n' +
                     'Enable it in:\n' +
-                    'Settings → Safari → Location → Allow'
+                    'Settings → Apps → Safari → Location → Ask\n' +
+                    'AND/OR:\n' +
+                    'Settings → Privacy & Security → Location Services → Safari Websites → Ask Next Time Or When I Share'
                 );
             }
         },
@@ -38,33 +40,6 @@ function startWatchingPosition() {
         }
     );
 }
-
-/*
-function startWatchingPosition() {
-    if ('geolocation' in navigator) {
-        watchId = navigator.geolocation.watchPosition(
-            pos => {
-                const latlng = L.latLng(pos.coords.latitude, pos.coords.longitude);
-                onLocationFound({ latlng: latlng, accuracy: pos.coords.accuracy });
-            },
-            err => {
-                console.warn('watchPosition error', err);
-                // fallback for desktop / denied permissions
-                const fallback = L.latLng(38.34505, -85.81951); // IUS campus
-                onLocationFound({ latlng: fallback, accuracy: 5 });
-            },
-            {
-                enableHighAccuracy: true,
-                maximumAge: 0,
-                timeout: 10000
-            }
-        );
-    } else {
-        // fallback for testing. Could manifest to bug
-        const fallback = L.latLng(38.34505, -85.81951);
-        onLocationFound({ latlng: fallback, accuracy: 5 });
-    }
-}*/
 
 let accuracyCircle = null;
 
