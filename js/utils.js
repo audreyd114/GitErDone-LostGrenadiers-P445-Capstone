@@ -23,15 +23,7 @@ function startWatchingPosition() {
         err => {
             console.warn('watchPosition error', err);
 
-            if (err.code === err.PERMISSION_DENIED) {
-                alert(
-                    'Location access is disabled.\n\n' +
-                    'Enable it in:\n' +
-                    'Settings → Apps → Safari → Location → Ask\n' +
-                    'AND/OR:\n' +
-                    'Settings → Privacy & Security → Location Services → Safari Websites → Ask Next Time Or When I Share'
-                );
-            }
+            showLocationHelp(err);
         },
         {
             enableHighAccuracy: true,
@@ -41,7 +33,51 @@ function startWatchingPosition() {
     );
 }
 
-let accuracyCircle = null;
+function detectOSAndBrowser() {
+    const ua = navigator.userAgent;
+
+    const isIOS = /iPad|iPhone|iPod/.test(ua);
+    const isAndroid = /Android/.test(ua);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(ua);
+    const isChrome = /Chrome/.test(ua) && !/Edg/.test(ua);
+
+    return {
+        isIOS,
+        isAndroid,
+        // Maybe for later
+        isSafari,
+        isChrome
+    };
+}
+
+function showLocationHelp(err) {
+    if (err.code !== err.PERMISSION_DENIED) return;
+
+    const { isIOS, isAndroid } = detectOSAndBrowser();
+
+    let message = 'Location access is disabled.\n\n';
+
+    if (isIOS) {
+        message +=
+            'On iPhone:\n' +
+            'Enable it in:\n' +
+            'Settings → Apps → Safari → Location → Ask\n' +
+            'AND/OR:\n' +
+            'Settings → Privacy & Security → Location Services → Safari Websites → Ask Next Time Or When I Share';
+    } else if (isAndroid) {
+        message +=
+            'On Android:\n' +
+            'Settings → Location → App Location Permissions → Browser → Allow\n' +
+            'AND/OR\n' +
+            'Chrome → Settings → Site Settings → Location → Allow while visiting the site';
+    } else {
+        message +=
+            'On Desktop:\n' +
+            'Check browser address bar → Location permissions → Allow';
+    }
+
+    alert(message);
+}
 
 function stopWatchingPosition(){ if(watchId){ navigator.geolocation.clearWatch(watchId); watchId=null; }}
 
@@ -100,13 +136,6 @@ function handleOrientation(ev){
     if (!arrow) return;
 
     arrow.style.transform = `rotate(${smoothHeading(heading)}deg)`;
-
-    /*if(userMarker && heading !== null){
-        const arrow = userMarker.getElement()?.querySelector('.arrow');
-        if(arrow){
-            arrow.style.transform = `rotate(${smoothHeading(heading)}deg)`;
-        }
-    }*/
 }
 
 let lastHeading = null;
