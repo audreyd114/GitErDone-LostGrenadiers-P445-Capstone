@@ -44,6 +44,12 @@ function requestRoute(from, to, destinationRoom = '') {
 function drawRoute(route){
     if(routeLayer) routeLayer.remove();
     routeLayer = L.polyline(route.geometry, {weight:6, color: '#2563eb', lineJoin: 'round'}).addTo(map);
+    map.fitBounds(routeLayer.getBounds(), {padding:[40,40]});
+}
+
+/*function drawRoute(route){
+    if(routeLayer) routeLayer.remove();
+    routeLayer = L.polyline(route.geometry, {weight:6}).addTo(map);
     document.getElementById('routeSummary').textContent = 'Route loaded — follow the steps below.';
     const steps = document.getElementById('steps');
     steps.hidden = false; steps.innerHTML = '';
@@ -54,7 +60,7 @@ function drawRoute(route){
     });
     // zoom to fit
     map.fitBounds(routeLayer.getBounds(), {padding:[40,40]});
-}
+}*/
 
 function interpolateMidpoint(a,b,t=0.5){
     return [(1-t)*a[0]+t*b[0], (1-t)*a[1]+t*b[1]];
@@ -74,3 +80,9 @@ document.getElementById('mockRouteBtn').addEventListener('click', () => {
         'TEST_ROOM'
     );
 });
+
+/*document.getElementById('mockRouteBtn').addEventListener('click', ()=>{
+    const from = map.getCenter();
+    const to = [from.lat + 0.0025, from.lng + 0.0025];
+    requestRoute([from.lat, from.lng], to);
+});*/

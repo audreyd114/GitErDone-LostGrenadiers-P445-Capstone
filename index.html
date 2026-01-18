@@ -21,15 +21,10 @@
             <input id="search" type="search" placeholder="Search building or room (e.g. LF 119)" aria-label="Search building or room" />
             <button id="searchBtn" aria-label="Search">Go</button>
         </div>
-        <button id="locateBtn" title="Center map on your location">Locate</button>
     </header>
 
     <main>
         <div id="map" role="application" aria-label="Campus map"></div>
-
-        <div class="controls" aria-hidden="false">
-            <div class="control-btn" id="toggleIndoor">Indoor: Off</div>
-        </div>
 
         <div id="floorSelector" style="
             position:absolute;
@@ -65,13 +60,41 @@
         </div>
 
 
-        <aside class="panel" id="routingPanel" aria-live="polite">
-            <h3>Route</h3>
-            <div id="routeSummary">No route loaded. Search for a building to begin.</div>
-            <div class="route-steps" id="steps" hidden></div>
-            <div style="display:flex;gap:8px;margin-top:8px">
-                <button id="clearBtn">Clear</button>
-                <button id="mockRouteBtn">Mock route</button>
+        <aside class="panel" id="controlPanel" aria-label="Map controls">
+            <h3>Navigation Controls</h3>
+
+            <button id="panelLocateBtn">Locate</button>
+            <button id="clearBtn">Clear Route</button>
+
+            <div class="toggle-row">
+                <div class="toggle-row">
+                    <span>Accessible Route</span>
+                    <label class="switch">
+                        <input type="checkbox" id="accessibleToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="toggle-row">
+                <div class="toggle-row">
+                    <span>Indoor Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="indoorToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="panelFloorSelector">
+                <div class="floor-label">Floor</div>
+                <div class="floor-buttons">
+                    <button data-floor="1">1</button>
+                    <button data-floor="2">2</button>
+                    <button data-floor="3">3</button>
+                    <button data-floor="4">4</button>
+                    <button data-floor="5">5</button>
+                </div>
             </div>
         </aside>
     </main>

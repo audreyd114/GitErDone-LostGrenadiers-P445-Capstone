@@ -49,3 +49,85 @@ Controls
     background: #d0d0ff;
     font-weight: bold;
 }
+
+/* Control Panel (bottom-right) */
+#controlPanel button {
+    width: 100%;
+    margin-top: 6px;
+}
+
+#controlPanel h3 {
+    margin-bottom: 8px;
+}
+
+.toggle-row {
+    margin-top: 10px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+#panelFloorSelector {
+    margin-top: 12px;
+}
+
+.floor-label {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.floor-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.floor-buttons button {
+    flex: 1;
+    padding: 6px 0;
+}
+
+/* Toggle switch */
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 22px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #ccc;
+    border-radius: 22px;
+    transition: 0.2s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+input:checked + .slider {
+    background-color: #1a73e8;
+}
+
+input:checked + .slider:before {
+    transform: translateX(20px);
+}
