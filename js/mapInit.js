@@ -8,7 +8,7 @@ Responsible for creating the Leaflet map, tile layers, and basic map setup
 //  - Replace mockRoute() with a call to the backend /api/route
 //  - Optionally add leaflet-routing-machine or pgrouting-based tile/layer
 
-const map = L.map('map', {zoomControl:true}).setView([38.34505, -85.81951], 17); // IUS
+window.map = L.map('map', {zoomControl:true}).setView([38.34505, -85.81951], 17); // IUS
 
 // OpenStreetMap baselayer
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
