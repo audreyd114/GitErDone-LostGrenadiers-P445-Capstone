@@ -3,8 +3,39 @@ UI.js
 User interface controls like locate, follow, search, keyboard shortcuts, welcome popup.
  */
 
+async function handleLocate(buttonEl) {
+
+    // iOS compass permission
+    if (typeof DeviceOrientationEvent !== 'undefined' &&
+        typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+            const res = await DeviceOrientationEvent.requestPermission();
+            if (res !== 'granted') return;
+        } catch (e) {
+            console.warn(e);
+        }
+    }
+
+    follow = true;
+
+    if (!watchId) {
+        startWatchingPosition();
+        buttonEl.textContent = 'Locating…';
+    }
+
+    if (userMarker) {
+        map.setView(userMarker.getLatLng(), 18, { animate: true });
+    }
+}
+
+document.getElementById('panelLocateBtn')
+    .addEventListener('click', function () {
+        handleLocate(this);
+    });
+
+
 // Simple UI controls
-document.getElementById('locateBtn').addEventListener('click', ()=>{
+/*document.getElementById('locateBtn').addEventListener('click', ()=>{
 
     //iOS compass permission
     if (typeof DeviceOrientationEvent !== 'undefined' &&
@@ -41,7 +72,7 @@ document.getElementById('locateBtn').addEventListener('click', ()=>{
     if (userMarker) {
         map.setView(userMarker.getLatLng(), 18);
     }
-});
+});*/
 
 // Search handling (very simple client-side demo)
 const searchInput = document.getElementById('search');
@@ -73,9 +104,35 @@ window.addEventListener('keydown', (e)=>{
     }
 });
 
+// Panel Locate mirrors header Locate
+document.getElementById('panelLocateBtn')
+    .addEventListener('click', () => {
+        document.getElementById('locateBtn').click();
+    });
+
+// Accessible toggle (UI only for now)
+document.getElementById('accessibleToggle')
+    .addEventListener('change', (e) => {
+        console.log('Accessible route:', e.target.checked);
+        // Later: pass flag into requestRoute()
+    });
+
+// Floor buttons
+document.querySelectorAll('#panelFloorSelector button')
+    .forEach(btn => {
+        btn.addEventListener('click', () => {
+            const floor = btn.dataset.floor;
+            setIndoorFloor?.(floor);
+        });
+    });
+
 // On load: show a small welcome popup
-setTimeout(()=>{
-    L.popup({autoClose:true,closeOnClick:true}).setLatLng(map.getCenter())
+window.map.whenReady(() => {
+    L.popup({
+        autoClose: true,
+        closeOnClick: true
+    })
+        .setLatLng(window.map.getCenter())
         .setContent('<strong>Welcome!</strong><br/>Search for buildings or press "Locate" to center on your device.')
-        .openOn(map);
-},800);
+        .openOn(window.map);
+});
