@@ -41,14 +41,15 @@ const buildingFloorBounds = {
 };
 
 //Indoor mode toggle
-const indoorBtn = document.getElementById("toggleIndoor");
-const floorSelector = document.getElementById("floorSelector");
+const indoorToggle = document.getElementById("indoorToggle");
+const floorPanel = document.getElementById("panelFloorSelector");
 
-indoorBtn.addEventListener("click", () => {
-    indoorMode = !indoorMode;
+floorPanel.style.display = 'none'; // start hidden
 
-    indoorBtn.textContent = indoorMode ? "Indoor: On" : "Indoor: Off";
-    floorSelector.style.display = indoorMode ? "block" : "none";
+indoorToggle.addEventListener("change", () => {
+    indoorMode = indoorToggle.checked;
+
+    floorPanel.style.display = indoorMode ? "block" : "none";
 
     if (!indoorMode) {
         clearIndoorOverlay();
