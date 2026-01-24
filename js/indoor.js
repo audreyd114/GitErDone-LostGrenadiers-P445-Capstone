@@ -9,36 +9,43 @@ let currentFloor = 1;
 let currentBuilding = null;
 let currentOverlay = null;
 
-// Southwest corner and Northeast corner
-const buildingFloorBounds = {
-    LF: {
-        1: [[38.342939, -85.819293], [38.343239,-85.818518]]
-    },
-    PS: {
-
-    },
-    LIB: {
-
-    },
-    CV: {
-
-    },
-    HH: {
-
-    },
-    US: {
-
-    },
-    UC: {
-
-    },
-    KV: {
-
-    },
-    OG: {
-
-    }
+const buildingIdMap = {
+    CV: 6
 };
+
+const dynamicFloorBounds = {};
+
+async function fetchFloorBounds(dbBuildingId) {
+    if (dynamicFloorBounds[dbBuildingId]) {
+        return dynamicFloorBounds[dbBuildingId];
+    }
+
+    const res = await fetch(`/api/floor-corners/${dbBuildingId}`);
+    if (!res.ok) {
+        throw new Error("Failed to fetch floor corners");
+    }
+
+    const corners = await res.json();
+
+    const lats = corners.map(c => c.lat);
+    const lons = corners.map(c => c.lon);
+
+    console.log("Fetching floor bounds for DB building:", dbBuildingId);
+
+    const bounds = [
+        [Math.min(...lats), Math.min(...lons)],
+        [Math.max(...lats), Math.max(...lons)]
+    ];
+
+    dynamicFloorBounds[dbBuildingId][floorNum] = bounds;
+
+    corners.forEach(c => {
+        L.circleMarker([c.lat, c.lon], { radius: 4, color: 'red' }).addTo(map)
+            .bindPopup(`Corner ${c.corner_order}`);
+    });
+
+    return dynamicFloorBounds[dbBuildingId];
+}
 
 //Indoor mode toggle
 const indoorToggle = document.getElementById("indoorToggle");
@@ -82,21 +89,36 @@ document.querySelectorAll("#floorSelector button").forEach(btn => {
 });
 
 //Overlay loading
-function loadFloorOverlay(buildingId, floorNum) {
+async function loadFloorOverlay(buildingId, floorNum) {
+    console.log("loadFloorOverlay called:", buildingId, floorNum);
     clearIndoorOverlay();
 
-    const bounds = buildingFloorBounds?.[buildingId]?.[floorNum];
-    if (!bounds) {
-        console.warn("No indoor bounds for", buildingId, "floor", floorNum);
-        return;
+    try {
+        const dbBuildingId = buildingIdMap[buildingId];
+        console.log("Mapped DB building ID:", dbBuildingId);
+        if (!dbBuildingId) {
+            console.warn("No DB mapping for building:", buildingId);
+            return;
+        }
+
+        const buildingBounds = await fetchFloorBounds(dbBuildingId);
+        const bounds = buildingBounds?.[floorNum];
+
+        if (!bounds) {
+            console.warn("No indoor bounds for", buildingId, "floor", floorNum);
+            return;
+        }
+
+        const url = `/indoor/${buildingId}_floor${floorNum}.png`;
+
+        currentOverlay = L.imageOverlay(url, bounds, {
+            opacity: 0.9,
+            interactive: false
+        }).addTo(map);
+
+    } catch (err) {
+        console.error("Indoor overlay failed:", err);
     }
-
-    const url = `/indoor/${buildingId}_floor${floorNum}.png`;
-
-    currentOverlay = L.imageOverlay(url, bounds, {
-        opacity: 0.9,
-        interactive: false
-    }).addTo(map);
 }
 
 //cleanup
