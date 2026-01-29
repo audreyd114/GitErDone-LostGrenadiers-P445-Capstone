@@ -1,6 +1,7 @@
 /*
 Indoor.js
 All indoor/floor overlay logic and indoor UI.
+Only Crestview floor 1 right now 1/29.
 */
 
 // INDOOR MODE + FLOOR OVERLAYS
@@ -12,40 +13,6 @@ let currentOverlay = null;
 const buildingIdMap = {
     CV: 6
 };
-
-const dynamicFloorBounds = {};
-
-async function fetchFloorBounds(dbBuildingId) {
-    if (dynamicFloorBounds[dbBuildingId]) {
-        return dynamicFloorBounds[dbBuildingId];
-    }
-
-    const res = await fetch(`/api/floor-corners/${dbBuildingId}`);
-    if (!res.ok) {
-        throw new Error("Failed to fetch floor corners");
-    }
-
-    const corners = await res.json();
-
-    const lats = corners.map(c => c.lat);
-    const lons = corners.map(c => c.lon);
-
-    console.log("Fetching floor bounds for DB building:", dbBuildingId);
-
-    const bounds = [
-        [Math.min(...lats), Math.min(...lons)],
-        [Math.max(...lats), Math.max(...lons)]
-    ];
-
-    dynamicFloorBounds[dbBuildingId][floorNum] = bounds;
-
-    corners.forEach(c => {
-        L.circleMarker([c.lat, c.lon], { radius: 4, color: 'red' }).addTo(map)
-            .bindPopup(`Corner ${c.corner_order}`);
-    });
-
-    return dynamicFloorBounds[dbBuildingId];
-}
 
 //Indoor mode toggle
 const indoorToggle = document.getElementById("indoorToggle");
@@ -88,37 +55,63 @@ document.querySelectorAll("#floorSelector button").forEach(btn => {
     });
 });
 
+const imageAnchors = {
+    CV: {
+        1: {
+            topLeft: [38.34373394, -85.82022324],
+            topRight: [38.34367453, -85.81954047],
+            bottomRight: [38.34340879, -85.81957783]
+        }
+    }
+}
+
+function computeBottomLeft(topLeft, topRight, bottomRight) {
+    const downLat = bottomRight[0] - topRight[0];
+    const downLon = bottomRight[1] - topRight[1];
+
+    return [
+        topLeft[0] + downLat,
+        topLeft[1] + downLon
+    ];
+}
+
+const bottomLeft = computeBottomLeft(topLeft, topRight, bottomRight);
+
+currentOverlay = L.imageOverlay.rotated(
+    '/indoor/CV_floor1.png',
+    topLeft,
+    topRight,
+    bottomLeft,
+    { opacity: 0.95 }
+).addTo(map);
+
+
 //Overlay loading
 async function loadFloorOverlay(buildingId, floorNum) {
     console.log("loadFloorOverlay called:", buildingId, floorNum);
     clearIndoorOverlay();
 
-    try {
-        const dbBuildingId = buildingIdMap[buildingId];
-        console.log("Mapped DB building ID:", dbBuildingId);
-        if (!dbBuildingId) {
-            console.warn("No DB mapping for building:", buildingId);
-            return;
-        }
-
-        const buildingBounds = await fetchFloorBounds(dbBuildingId);
-        const bounds = buildingBounds?.[floorNum];
-
-        if (!bounds) {
-            console.warn("No indoor bounds for", buildingId, "floor", floorNum);
-            return;
-        }
-
-        const url = `/indoor/${buildingId}_floor${floorNum}.png`;
-
-        currentOverlay = L.imageOverlay(url, bounds, {
-            opacity: 0.9,
-            interactive: false
-        }).addTo(map);
-
-    } catch (err) {
-        console.error("Indoor overlay failed:", err);
+    const floorData = imageAnchors?.[buildingId]?.[floorNum];
+    if (!floorData) {
+        console.warn("No image anchors for", buildingId, "floor", floorNum);
+        return;
     }
+
+    const { topLeft, topRight, bottomRight } = floorData;
+    const bottomLeft = computeBottomLeft(topLeft, topRight, bottomRight);
+
+    const url = `/indoor/${buildingId}_floor${floorNum}.png`;
+
+    currentOverlay = L.imageOverlay.rotated(
+        url,
+        topLeft,
+        topRight,
+        bottomLeft,
+        {
+            opacity: 0.95,
+            interactive: false
+        }
+    ).addTo(map);
 }
 
 //cleanup
