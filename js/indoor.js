@@ -6,13 +6,106 @@ Only Crestview floor 1 right now 1/29.
 
 // INDOOR MODE + FLOOR OVERLAYS
 let indoorMode = false;
-let currentFloor = 1;
+let currentFloor = 2;
 let currentBuilding = null;
 let currentOverlay = null;
 
 const buildingIdMap = {
     CV: 6
 };
+
+const imageAnchors = {
+    CV: {
+        1: {
+            topLeft: [38.34373394, -85.82022324],
+            topRight: [38.34367453, -85.81954047],
+            bottomLeft: [38.3434682, -85.8202606]
+        },
+        2: {
+            topLeft: [38.34373394, -85.82022324],
+            topRight: [38.34367453, -85.81954047],
+            bottomLeft: [38.3434682, -85.8202606]
+        },
+        3: {
+            topLeft: [38.34373394, -85.82022324],
+            topRight: [38.34367453, -85.81954047],
+            bottomLeft: [38.3434682, -85.8202606]
+        }
+    },
+    LF: {
+        1: {
+            topLeft: [38.343341844, -85.819342992],
+            topRight: [38.343268622, -85.818446187],
+            bottomLeft: [38.342861052, -85.819406810]
+        },
+        2: {
+            topLeft: [38.343341844, -85.819342992],
+            topRight: [38.343268622, -85.818446187],
+            bottomLeft: [38.342861052, -85.819406810]
+        }
+    },
+    PS: {
+        1: {
+            topLeft: [38.34372324, -85.81825947],
+            topRight: [38.34369617, -85.81790682],
+            bottomLeft: [38.34313052, -85.81833337]
+        },
+        2: {
+            topLeft: [38.34372324, -85.81825947],
+            topRight: [38.34369617, -85.81790682],
+            bottomLeft: [38.34313052, -85.81833337]
+        },
+        3: {
+            topLeft: [38.34372324, -85.81825947],
+            topRight: [38.34369617, -85.81790682],
+            bottomLeft: [38.34313052, -85.81833337]
+        }
+    },
+    HH: {
+        1: {
+            topLeft: [38.34461096, -85.82089446],
+            topRight: [38.34452804, -85.82003091],
+            bottomLeft: [38.34412244, -85.82097062]
+        },
+        2: {
+            topLeft: [38.34461096, -85.82089446],
+            topRight: [38.34452804, -85.82003091],
+            bottomLeft: [38.34412244, -85.82097062]
+        },
+        3: {
+            topLeft: [38.34461096, -85.82089446],
+            topRight: [38.34452804, -85.82003091],
+            bottomLeft: [38.34412244, -85.82097062]
+        },
+        4: {
+            topLeft: [38.34461096, -85.82089446],
+            topRight: [38.34452804, -85.82003091],
+            bottomLeft: [38.34412244, -85.82097062]
+        },
+        5: {
+            topLeft: [38.34461096, -85.82089446],
+            topRight: [38.34452804, -85.82003091],
+            bottomLeft: [38.34412244, -85.82097062]
+        }
+    },
+    KV: {
+        1: {
+            topLeft: [38.3473728, -85.8201864],
+            topRight: [38.3473024, -85.8194199],
+            bottomLeft: [38.34653052, -85.82031366]
+        },
+        2: {
+            topLeft: [38.3473728, -85.8201864],
+            topRight: [38.3473024, -85.8194199],
+            bottomLeft: [38.34653052, -85.82031366]
+        },
+        3: {
+            topLeft: [38.3473728, -85.8201864],
+            topRight: [38.3473024, -85.8194199],
+            bottomLeft: [38.34653052, -85.82031366]
+        }
+    }
+}
 
 //Indoor mode toggle
 const indoorToggle = document.getElementById("indoorToggle");
@@ -37,13 +130,23 @@ buildings.forEach(b => {
         if (!indoorMode) return;
 
         currentBuilding = b.id;
-        currentFloor = 1;
+
+        const floors = Object.keys(imageAnchors[currentBuilding] || {})
+            .map(Number)
+            .sort((a, b) => a - b);
+
+        if (floors.length === 0) return;
+
+        // Prefer floor 2, otherwise first available floor
+        currentFloor = floors.includes(2) ? 2 : floors[0];
+
         loadFloorOverlay(currentBuilding, currentFloor);
     });
 });
 
+
 //floor buttons
-document.querySelectorAll("#floorSelector button").forEach(btn => {
+document.querySelectorAll("#panelFloorSelector button").forEach(btn => {
     btn.addEventListener("click", () => {
         if (!currentBuilding) {
             alert("Select a building first.");
@@ -54,37 +157,6 @@ document.querySelectorAll("#floorSelector button").forEach(btn => {
         loadFloorOverlay(currentBuilding, currentFloor);
     });
 });
-
-const imageAnchors = {
-    CV: {
-        1: {
-            topLeft: [38.34373394, -85.82022324],
-            topRight: [38.34367453, -85.81954047],
-            bottomRight: [38.34340879, -85.81957783]
-        }
-    }
-}
-
-function computeBottomLeft(topLeft, topRight, bottomRight) {
-    const downLat = bottomRight[0] - topRight[0];
-    const downLon = bottomRight[1] - topRight[1];
-
-    return [
-        topLeft[0] + downLat,
-        topLeft[1] + downLon
-    ];
-}
-
-const bottomLeft = computeBottomLeft(topLeft, topRight, bottomRight);
-
-currentOverlay = L.imageOverlay.rotated(
-    '/indoor/CV_floor1.png',
-    topLeft,
-    topRight,
-    bottomLeft,
-    { opacity: 0.95 }
-).addTo(map);
-
 
 //Overlay loading
 async function loadFloorOverlay(buildingId, floorNum) {
@@ -97,8 +169,7 @@ async function loadFloorOverlay(buildingId, floorNum) {
         return;
     }
 
-    const { topLeft, topRight, bottomRight } = floorData;
-    const bottomLeft = computeBottomLeft(topLeft, topRight, bottomRight);
+    const { topLeft, topRight, bottomLeft } = floorData;
 
     const url = `/indoor/${buildingId}_floor${floorNum}.png`;
 
