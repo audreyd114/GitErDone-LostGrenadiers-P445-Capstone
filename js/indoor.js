@@ -10,20 +10,22 @@ let currentFloor = 2;
 let currentBuilding = null;
 let currentOverlay = null;
 
-const buildingIdMap = {
-    CV: 6
-};
-/*
+const unavailableFloors = {
+    PS: [1],
+    HH: [3, 4, 5],
+    KV: [1, 2, 3],
+    LI: [1, 2, 3, 4],
+    OG: [1, 2, 3, 4],
+    US: [1, 2, 3, 4, 5]
+}
 
-Hillside Hall Floor 1
-38.34457103, -85.82085055
-38.34453663, -85.82043964
-38.34416606, -85.82090770
+function isFloorUnavailable(buildingId, floorNum) {
+    const entry = unavailableFloors[buildingId];
+    if (!entry) return false;
+    if (entry === 'ALL') return true;
+    return entry.includes(floorNum);
+}
 
-Hillside Hall Floor 2
-38.34460928, -85.82095303
-38.34455460, -85.82036722
-38.34413920, -85.82102299*/
 const imageAnchors = {
     CV: {
         1: {
@@ -147,6 +149,11 @@ buildings.forEach(b => {
 
         if (floors.length === 0) return;
 
+        if (isFloorUnavailable(currentBuilding, currentFloor)) {
+            showUnavailableFloorModal(currentBuilding, currentFloor);
+            return;
+        }
+
         // Prefer floor 2, otherwise first available floor
         currentFloor = floors.includes(2) ? 2 : floors[0];
 
@@ -163,7 +170,14 @@ document.querySelectorAll("#panelFloorSelector button").forEach(btn => {
             return;
         }
 
-        currentFloor = Number(btn.dataset.floor);
+        const selectedFloor = Number(btn.dataset.floor);
+
+        if (isFloorUnavailable(currentBuilding, selectedFloor)) {
+            showUnavailableFloorModal(currentBuilding, selectedFloor);
+            return;
+        }
+
+        currentFloor = selectedFloor;
         loadFloorOverlay(currentBuilding, currentFloor);
     });
 });
@@ -193,6 +207,25 @@ async function loadFloorOverlay(buildingId, floorNum) {
             interactive: false
         }
     ).addTo(map);
+}
+
+const floorModal = document.getElementById("floorUnavailableModal");
+const floorModalText = document.getElementById("floorUnavailableText");
+const closeFloorModalBtn = document.getElementById("closeFloorModal");
+
+closeFloorModalBtn?.addEventListener("click", () => {
+    floorModal.classList.add("hidden");
+});
+
+function showUnavailableFloorModal(buildingId, floorNum) {
+    const buildingName =
+        buildings.find(b => b.id === buildingId)?.name || buildingId;
+
+    floorModalText.textContent =
+        `We're sorry. This floor is unavailable for indoor routing at the moment.
+        ${buildingName} – Floor ${floorNum} will be available soon!`;
+
+    floorModal.classList.remove("hidden");
 }
 
 //cleanup
