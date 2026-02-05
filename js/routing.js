@@ -5,7 +5,7 @@ All route calculation, polyline, and step display.
 
 // Simple mock route (replace with backend call)
 
-import { getRoute } from './databaselink.js';
+import { getRoute } from './getMockRoute.js';
 
 let previewRouteLine = null;
 let activeRouteLine = null;
@@ -53,12 +53,15 @@ function showApproveRouteModal({ startLabel, endLabel }) {
             // routeActive = true;
             // startNavigation();
             startRoute();
+        },
+        onCancel: () => {
+            clearPreviewRoute();
         }
     });
-    modalCancelBtn.onclick = () => {
+  /*  modalCancelBtn.onclick = () => {
         clearPreviewRoute();
         closeModal();
-    }
+    }*/
 }
 
 function clearPreviewRoute() {
@@ -82,7 +85,7 @@ function startRoute() {
         dashArray: null
     });
 
-    if (indoorMode) {
+    if (window.isIndoorMode?.()) {
         hideBuildingMarkers();
     }
 

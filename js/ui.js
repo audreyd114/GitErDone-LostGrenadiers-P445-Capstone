@@ -77,13 +77,15 @@ document.getElementById('accessibleToggle')
     });
 
 // Floor buttons
-document.querySelectorAll('#panelFloorSelector button')
+/*document.querySelectorAll('#panelFloorSelector button')
     .forEach(btn => {
         btn.addEventListener('click', () => {
             const floor = btn.dataset.floor;
             setIndoorFloor?.(floor);
         });
     });
+
+ */
 
 const appModal = document.getElementById("appModal");
 const modalTitle = document.getElementById("modalTitle");
@@ -99,6 +101,8 @@ function showModal({ title, message, confirmText = "OK", cancelText = "Cancel", 
 
     modalConfirmBtn.textContent = confirmText;
     modalCancelBtn.textContent = cancelText;
+
+    modalCancelBtn.style.display = cancelText ? 'inline-block' : 'none';
 
     modalConfirmCallback = onConfirm || null;
 
@@ -127,3 +131,6 @@ window.map.whenReady(() => {
         .setContent('<strong>Welcome!</strong><br/>Search for buildings or press "Locate" to center on your device.')
         .openOn(window.map);
 });
+
+window.showModal = showModal;
+window.closeModal = closeModal;

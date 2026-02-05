@@ -1,4 +1,4 @@
-import pool from './databaseconfig.js'
+//import pool from './databaseconfig.js'
 
 export function getRoute(userLat, userLong, destinationRoom) {
     return [
