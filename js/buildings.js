@@ -33,3 +33,17 @@ buildings.forEach(b => {
             );
         });
 });
+
+const buildingMarkerGroup = L.layerGroup().addTo(outdoorLayer);
+
+function hideBuildingMarkers() {
+    if (map.hasLayer(buildingMarkerGroup)) {
+        map.removeLayer(buildingMarkerGroup);
+    }
+}
+
+function showBuildingMarkers() {
+    if (!map.hasLayer(buildingMarkerGroup)) {
+        map.addLayer(buildingMarkerGroup);
+    }
+}

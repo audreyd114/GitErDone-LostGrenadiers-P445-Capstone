@@ -125,8 +125,14 @@ export {
 
 /*
 let routeLayer = null;
+let routeActive = false;
 
 function requestRoute(from, to, destinationRoom = '') {
+    routeActive = true;
+
+    if (indoorMode) {
+        hideBuildingMarkers();
+    }
     // Call teammate mock function
     const rawPoints = getRoute(from[0], from[1], destinationRoom);
 
@@ -160,6 +166,8 @@ document.getElementById('clearBtn').addEventListener('click', ()=>{
     if(routeLayer) routeLayer.remove();
     document.getElementById('routeSummary').textContent = 'No route loaded. Search for a building to begin.';
     document.getElementById('steps').hidden = true;
+    routeActive = false;
+    showBuildingMarkers();
 });
 
 document.getElementById('mockRouteBtn').addEventListener('click', () => {
