@@ -5,11 +5,137 @@ All route calculation, polyline, and step display.
 
 // Simple mock route (replace with backend call)
 
-import { getRoute } from './databaselink.js';
+import { getRoute } from './getMockRoute.js';
 
+let previewRouteLine = null;
+let activeRouteLine = null;
+let routeActive = false;
+
+// route request as a PREVIEW. not active
+function requestRoutePreview(from, destinationRoom = '') {
+    const rawPoints = getRoute(from[0], from[1], destinationRoom);
+
+    const geometry = rawPoints.map(p => [p.lat, p.lon]);
+
+    showPreviewRoute(geometry);
+
+    // Ask user to approve route
+    showApproveRouteModal({
+        startLabel: 'Your Location',
+        endLabel: destinationRoom || 'Destination'
+    });
+}
+
+// preview route
+function showPreviewRoute(latlngs) {
+    clearPreviewRoute();
+
+    previewRouteLine = L.polyline(latlngs, {
+        weight: 6,
+        color: '#2563eb',
+        opacity: 0.6,
+        dashArray: '6,8'
+    }).addTo(map);
+
+    map.fitBounds(previewRouteLine.getBounds(), { padding: [40, 40] });
+}
+
+function showApproveRouteModal({ startLabel, endLabel }) {
+    showModal({
+        title: "Start Route?",
+        message:
+            `You're about to start navigation.\n\nFrom: ${startLabel}\nTo: ${endLabel}`,
+        confirmText: "Start",
+        cancelText: "Cancel",
+        onConfirm: () => {
+            console.log("Route approved!");
+            // Later:
+            // routeActive = true;
+            // startNavigation();
+            startRoute();
+        },
+        onCancel: () => {
+            clearPreviewRoute();
+        }
+    });
+  /*  modalCancelBtn.onclick = () => {
+        clearPreviewRoute();
+        closeModal();
+    }*/
+}
+
+function clearPreviewRoute() {
+    if (previewRouteLine) {
+        map.removeLayer(previewRouteLine);
+        previewRouteLine = null;
+    }
+}
+
+// activate route
+function startRoute() {
+    if (!previewRouteLine) return;
+
+    routeActive = true;
+
+    activeRouteLine = previewRouteLine;
+    previewRouteLine = null;
+
+    activeRouteLine.setStyle({
+        opacity: 1,
+        dashArray: null
+    });
+
+    if (window.isIndoorMode?.()) {
+        hideBuildingMarkers();
+    }
+
+    console.log('Route started');
+}
+
+// clear route
+function clearRoute() {
+    clearPreviewRoute();
+
+    if (activeRouteLine) {
+        map.removeLayer(activeRouteLine);
+        activeRouteLine = null;
+    }
+
+    routeActive = false;
+    showBuildingMarkers();
+
+    console.log('Route cleared');
+}
+
+// dev/test hooks
+document.getElementById('mockRouteBtn').addEventListener('click', () => {
+    const center = map.getCenter();
+
+    requestRoutePreview(
+        [center.lat, center.lng],
+        'TEST_ROOM'
+    );
+});
+
+document.getElementById('clearBtn')
+    ?.addEventListener('click', clearRoute);
+
+export {
+    requestRoutePreview,
+    startRoute,
+    clearRoute
+};
+
+/*
 let routeLayer = null;
+let routeActive = false;
 
 function requestRoute(from, to, destinationRoom = '') {
+    routeActive = true;
+
+    if (indoorMode) {
+        hideBuildingMarkers();
+    }
     // Call teammate mock function
     const rawPoints = getRoute(from[0], from[1], destinationRoom);
 
@@ -27,19 +153,6 @@ function requestRoute(from, to, destinationRoom = '') {
     });
 }
 
-/*function requestRoute(from, to){
-    // Replace this fetch with the backend route API when ready:
-    // fetch(`/api/route?from=${from[0]},${from[1]}&to=${to[0]},${to[1]}`)
-    //   .then(r=>r.json()).then(drawRoute)
-
-    // For now use mock route: straight polyline
-    const mock = [from, interpolateMidpoint(from,to,0.4), to];
-    drawRoute({geometry: mock, steps:[
-            {text:'Head north for 50m'},
-            {text:'Turn right at the fountain'},
-            {text:`Arrive at ${to[0].toFixed(5)}, ${to[1].toFixed(5)}`}
-        ]});
-}*/
 
 function drawRoute(route){
     if(routeLayer) routeLayer.remove();
@@ -47,20 +160,6 @@ function drawRoute(route){
     map.fitBounds(routeLayer.getBounds(), {padding:[40,40]});
 }
 
-/*function drawRoute(route){
-    if(routeLayer) routeLayer.remove();
-    routeLayer = L.polyline(route.geometry, {weight:6}).addTo(map);
-    document.getElementById('routeSummary').textContent = 'Route loaded — follow the steps below.';
-    const steps = document.getElementById('steps');
-    steps.hidden = false; steps.innerHTML = '';
-    route.steps.forEach((s,i)=>{
-        const el = document.createElement('div'); el.className='step';
-        el.innerHTML = `<div style="font-weight:600;min-width:22px">${i+1}</div><div>${s.text}</div>`;
-        steps.appendChild(el);
-    });
-    // zoom to fit
-    map.fitBounds(routeLayer.getBounds(), {padding:[40,40]});
-}*/
 
 function interpolateMidpoint(a,b,t=0.5){
     return [(1-t)*a[0]+t*b[0], (1-t)*a[1]+t*b[1]];
@@ -70,6 +169,8 @@ document.getElementById('clearBtn').addEventListener('click', ()=>{
     if(routeLayer) routeLayer.remove();
     document.getElementById('routeSummary').textContent = 'No route loaded. Search for a building to begin.';
     document.getElementById('steps').hidden = true;
+    routeActive = false;
+    showBuildingMarkers();
 });
 
 document.getElementById('mockRouteBtn').addEventListener('click', () => {
@@ -80,9 +181,4 @@ document.getElementById('mockRouteBtn').addEventListener('click', () => {
         'TEST_ROOM'
     );
 });
-
-/*document.getElementById('mockRouteBtn').addEventListener('click', ()=>{
-    const from = map.getCenter();
-    const to = [from.lat + 0.0025, from.lng + 0.0025];
-    requestRoute([from.lat, from.lng], to);
-});*/
+*/

@@ -89,3 +89,13 @@ Indoor mode popup window.
     max-width: 320px;
     text-align: center;
 }
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+.modal-actions button.primary {
+    font-weight: bold;
+}

@@ -96,12 +96,18 @@
                     <button data-floor="5">5</button>
                 </div>
             </div>
-
-            <div id="floorUnavailableModal" class="modal hidden">
+            <button id="mockRouteBtn" class="map-btn">
+                Mock Route
+            </button>
+            <div id="appModal" class="modal hidden">
                 <div class="modal-content">
-                    <h2>Floor Unavailable</h2>
-                    <p id="floorUnavailableText"></p>
-                    <button id="closeFloorModal">OK</button>
+                    <h2 id="modalTitle"></h2>
+                    <p id="modalMessage"></p>
+
+                    <div class="modal-actions">
+                        <button id="modalCancelBtn">Cancel</button>
+                        <button id="modalConfirmBtn" class="primary">OK</button>
+                    </div>
                 </div>
             </div>
         </aside>
@@ -123,7 +129,7 @@ Notes for backend integration points:
 <script src="js/utils.js"></script>
 <script src="js/buildings.js"></script>
 <script src="js/indoor.js"></script>
-<script type="module" src="js/routing.js"></script>
+<script type="module" src="js/routingBridge.js"></script>
 <script src="js/ui.js"></script>
 
 </body>

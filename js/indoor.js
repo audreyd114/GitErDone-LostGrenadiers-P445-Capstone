@@ -1,7 +1,6 @@
 /*
 Indoor.js
 All indoor/floor overlay logic and indoor UI.
-Only Crestview floor 1 right now 1/29.
 */
 
 // INDOOR MODE + FLOOR OVERLAYS
@@ -9,6 +8,8 @@ let indoorMode = false;
 let currentFloor = 2;
 let currentBuilding = null;
 let currentOverlay = null;
+
+window.isIndoorMode = () => indoorMode;
 
 const unavailableFloors = {
     PS: [1],
@@ -210,7 +211,6 @@ async function loadFloorOverlay(buildingId, floorNum) {
 }
 
 const floorModal = document.getElementById("floorUnavailableModal");
-const floorModalText = document.getElementById("floorUnavailableText");
 const closeFloorModalBtn = document.getElementById("closeFloorModal");
 
 closeFloorModalBtn?.addEventListener("click", () => {
@@ -221,11 +221,15 @@ function showUnavailableFloorModal(buildingId, floorNum) {
     const buildingName =
         buildings.find(b => b.id === buildingId)?.name || buildingId;
 
-    floorModalText.textContent =
-        `We're sorry. This floor is unavailable for indoor routing at the moment.
-        ${buildingName} – Floor ${floorNum} will be available soon!`;
-
-    floorModal.classList.remove("hidden");
+    showModal({
+        title: "Floor Unavailable",
+        message:
+            `We're sorry. This floor is unavailable for indoor routing at the moment.
+            ${buildingName} – Floor ${floorNum} will be available soon!`,
+        confirmText: "OK",
+        cancelText: "",
+        onConfirm: null
+    });
 }
 
 //cleanup
