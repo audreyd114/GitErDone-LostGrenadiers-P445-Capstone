@@ -1,7 +1,6 @@
 /*
 Indoor.js
 All indoor/floor overlay logic and indoor UI.
-Only Crestview floor 1 right now 1/29.
 */
 
 // INDOOR MODE + FLOOR OVERLAYS
@@ -9,6 +8,8 @@ let indoorMode = false;
 let currentFloor = 2;
 let currentBuilding = null;
 let currentOverlay = null;
+
+window.isIndoorMode = () => indoorMode;
 
 const unavailableFloors = {
     PS: [1],
