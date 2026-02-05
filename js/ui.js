@@ -33,47 +33,6 @@ document.getElementById('panelLocateBtn')
         handleLocate(this);
     });
 
-
-// Simple UI controls
-/*document.getElementById('locateBtn').addEventListener('click', ()=>{
-
-    //iOS compass permission
-    if (typeof DeviceOrientationEvent !== 'undefined' &&
-        typeof DeviceOrientationEvent.requestPermission === 'function') {
-        DeviceOrientationEvent.requestPermission().catch(console.warn);
-    }
-
-    document.getElementById('locateBtn').addEventListener('click', async ()=>{
-
-        // iOS compass permission
-        if (typeof DeviceOrientationEvent !== 'undefined' &&
-            typeof DeviceOrientationEvent.requestPermission === 'function') {
-            try {
-                const res = await DeviceOrientationEvent.requestPermission();
-                if (res !== 'granted') return;
-            } catch(e){
-                console.warn(e);
-            }
-        }
-
-        follow = true; // Always follow after selecting "Locate"
-
-        if (!watchId) {
-            startWatchingPosition();
-            document.getElementById('locateBtn').textContent = 'Locating…';
-        }
-
-        if (userMarker) {
-            map.setView(userMarker.getLatLng(), 18, { animate: true });
-        }
-    });
-
-    // center map on last known position if available
-    if (userMarker) {
-        map.setView(userMarker.getLatLng(), 18);
-    }
-});*/
-
 // Search handling (very simple client-side demo)
 const searchInput = document.getElementById('search');
 document.getElementById('searchBtn').addEventListener('click', ()=>{
@@ -125,6 +84,38 @@ document.querySelectorAll('#panelFloorSelector button')
             setIndoorFloor?.(floor);
         });
     });
+
+const appModal = document.getElementById("appModal");
+const modalTitle = document.getElementById("modalTitle");
+const modalMessage = document.getElementById("modalMessage");
+const modalConfirmBtn = document.getElementById("modalConfirmBtn");
+const modalCancelBtn = document.getElementById("modalCancelBtn");
+
+let modalConfirmCallback = null;
+
+function showModal({ title, message, confirmText = "OK", cancelText = "Cancel", onConfirm }) {
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+
+    modalConfirmBtn.textContent = confirmText;
+    modalCancelBtn.textContent = cancelText;
+
+    modalConfirmCallback = onConfirm || null;
+
+    appModal.classList.remove("hidden");
+}
+
+function closeModal() {
+    appModal.classList.add("hidden");
+    modalConfirmCallback = null;
+}
+
+modalConfirmBtn.addEventListener("click", () => {
+    if (modalConfirmCallback) modalConfirmCallback();
+    closeModal();
+});
+
+modalCancelBtn.addEventListener("click", closeModal);
 
 // On load: show a small welcome popup
 window.map.whenReady(() => {
