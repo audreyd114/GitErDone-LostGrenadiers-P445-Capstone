@@ -31,13 +31,3 @@ export function getRoute(userLat, userLong, destinationRoom) {
         { lat: 38.34348869, lon: -85.82054996 }
     ];
 }
-// As of 1/23/2026, you can only pass buildingId = 6. This is Crestview Hall. But it will hopefully be enough for testing... I'll make another one asap.
-export async function get_floor_corners(buildingId){
-    const sql = `
-    SELECT corner_order, lon, lat
-    FROM app.get_floor_corners($1)
-    ORDER BY corner_order;
-    `;
-    const { rows } = await pool.query(sql, [buildingId]);
-    return rows;
-}
