@@ -3,6 +3,16 @@ UI.js
 User interface controls like locate, follow, search, keyboard shortcuts, welcome popup.
  */
 
+console.log('ui.js loaded');
+
+import {
+    requestRoutePreview,
+    startRoute,
+    clearPreviewRoute,
+    clearActiveRoute
+} from './routing.js';
+
+// Locate user
 async function handleLocate(buttonEl) {
 
     // iOS compass permission
@@ -33,9 +43,138 @@ document.getElementById('panelLocateBtn')
         handleLocate(this);
     });
 
-// Search handling (very simple client-side demo)
+// Search handling
 const searchInput = document.getElementById('search');
-document.getElementById('searchBtn').addEventListener('click', ()=>{
+const searchBtn = document.getElementById(('searchBtn'));
+
+searchBtn.addEventListener('click', async () => {
+    const q = searchInput.value.trim();
+    if (!q) return;
+
+    if (!userMarker) {
+        alert('Press Locate first so we know where to route you from.');
+        return;
+    }
+
+    // Expect formats like: "LF 119", "KV-110", "PS204"
+    const match = q.match(/^([A-Za-z]{2})[\s-]?(\d{2,4})$/);
+    if (!match) {
+        alert('Enter a room like: LF 119 or KV-110');
+        return;
+    }
+
+    const buildingCode = match[1].toUpperCase();
+    const roomNumber = match[2];
+    const roomCode = `${buildingCode}-${roomNumber}`;
+
+    const userLatLng = userMarker.getLatLng();
+
+    await requestRoutePreview(
+        [userLatLng.lat, userLatLng.lng],
+        roomCode,
+        document.getElementById('accessibleToggle').checked
+    );
+
+    showApproveRouteModal(roomCode);
+});
+
+//Modal
+const appModal = document.getElementById('appModal');
+const modalTitle = document.getElementById('modalTitle');
+const modalMessage = document.getElementById('modalMessage');
+const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+const modalCancelBtn = document.getElementById('modalCancelBtn');
+
+let modalConfirmCallback = null;
+
+function showModal({ title, message, confirmText, cancelText, onConfirm }) {
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+
+    modalConfirmBtn.textContent = confirmText;
+    modalCancelBtn.textContent = cancelText;
+
+    modalConfirmCallback = onConfirm;
+    appModal.classList.remove('hidden');
+}
+
+function closeModal() {
+    appModal.classList.add('hidden');
+    modalConfirmCallback = null;
+}
+
+modalConfirmBtn.addEventListener('click', () => {
+    if (modalConfirmCallback) modalConfirmCallback();
+    closeModal();
+});
+
+modalCancelBtn.addEventListener('click', () => {
+    clearPreviewRoute();
+    closeModal();
+});
+
+function showApproveRouteModal(roomCode) {
+    showModal({
+        title: 'Start Route?',
+        message: `Navigate to ${roomCode}?`,
+        confirmText: 'Start',
+        cancelText: 'Cancel',
+        onConfirm: () => {
+            startRoute();
+        }
+    });
+}
+
+//clear route
+document
+    .getElementById('clearBtn')
+    ?.addEventListener('click', clearActiveRoute);
+
+// welcome popup
+window.map.whenReady(() => {
+    L.popup({ autoClose: true })
+        .setLatLng(map.getCenter())
+        .setContent(
+            '<strong>Welcome!</strong><br>Search for buildings or press "Locate" to center on your device.'
+        )
+        .openOn(window.map);
+});
+
+/*document.getElementById('searchBtn').addEventListener('click', async () => {
+    const q = searchInput.value.trim();
+    if (!q) return;
+
+    const parsedRoom = parseRoomSearch?.(q);
+
+    if (parsedRoom) {
+        if (!userMarker) {
+            alert("Press Locate first so routing can take place.");
+            return;
+        }
+
+        const { buildingCode, roomNumber } = parsedRoom;
+        const roomCode = `${buildingCode}-${roomNumber}`;
+
+        const userLatLng = userMarker.getLatLng();
+
+        await requestRoutePreview(
+            [userLatLng.lat, userLatLng.lng],
+            roomCode,
+            document.getElementById('accessibleToggle').checked
+        );
+
+        showApproveRouteModal({
+            startLabel: "Your Location",
+            endLabel: roomCode
+        });
+
+        return;
+    }
+
+    alert('No building or room found.');
+});*/
+
+/*document.getElementById('searchBtn').addEventListener('click', ()=>{
     const q = searchInput.value.trim();
     if(!q) return;
     // For now, try to match building code or name from sample dataset
@@ -54,8 +193,30 @@ document.getElementById('searchBtn').addEventListener('click', ()=>{
     } else {
         alert('No building found in the sample dataset.');
     }
-});
+});*/
+/*
+function showApproveRouteModal({ startLabel, endLabel }) {
+    showModal({
+        title: "Start Route?",
+        message:
+            `You're about to start navigation.\n\nFrom: ${startLabel}\nTo: ${endLabel}`,
+        confirmText: "Start",
+        cancelText: "Cancel",
+        onConfirm: () => {
+            const userLatLng = userMarker.getLatLng();
 
+            startRoute(
+                [userLatLng.lat, userLatLng.lng],
+                endLabel,
+                document.getElementById('accessibleToggle').checked
+            );
+        },
+        onCancel: () => {
+            clearPreviewRoute();
+        }
+    });
+}*/
+/*
 // Accessibility: keyboard shortcut (f) to locate
 window.addEventListener('keydown', (e)=>{
     if(e.key === 'f'){
@@ -75,7 +236,7 @@ document.getElementById('accessibleToggle')
         console.log('Accessible route:', e.target.checked);
         // Later: pass flag into requestRoute()
     });
-
+*/
 // Floor buttons
 /*document.querySelectorAll('#panelFloorSelector button')
     .forEach(btn => {
@@ -86,7 +247,7 @@ document.getElementById('accessibleToggle')
     });
 
  */
-
+/*
 const appModal = document.getElementById("appModal");
 const modalTitle = document.getElementById("modalTitle");
 const modalMessage = document.getElementById("modalMessage");
@@ -121,6 +282,9 @@ modalConfirmBtn.addEventListener("click", () => {
 
 modalCancelBtn.addEventListener("click", closeModal);
 
+document.getElementById('clearBtn')
+    ?.addEventListener('click', clearActiveRoute);
+
 // On load: show a small welcome popup
 window.map.whenReady(() => {
     L.popup({
@@ -134,3 +298,4 @@ window.map.whenReady(() => {
 
 window.showModal = showModal;
 window.closeModal = closeModal;
+*/
