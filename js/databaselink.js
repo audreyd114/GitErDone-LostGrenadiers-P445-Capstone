@@ -19,7 +19,7 @@ export async function routeToRoom({lat, lon, room, accessible = false, baseUrl =
     try{
         data = await res.json();
     }catch{
-        const raw = await res.text().catcH(() => "");
+        const raw = await res.text().catch(() => "");
         data = {raw};
     }
 
