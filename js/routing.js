@@ -5,6 +5,8 @@ All route polyline and preview display.
 
 import { routeToRoom } from './databaselink.js';
 
+const {L, map} = window;
+
 let previewRouteLine = null;
 let activeRouteLine = null;
 let lastPreview = null;
@@ -21,7 +23,15 @@ export async function requestRoutePreview(fromLatLng, room, accessible = false) 
         accessible
     });
 
+    if (!data?.geometry || !Array.isArray(data.geometry)) {
+        console.error("Invalid route response:", data);
+        alert("Route could not be calculated.");
+        return;
+    }
+
     const geometry = data.geometry.map(p => [p.lat, p.lon]);
+
+    //const geometry = data.geometry.map(p => [p.lat, p.lon]);
 
     previewRouteLine = L.polyline(geometry, {
         weight: 6,
@@ -51,7 +61,15 @@ export async function startRoute() {
         accessible
     });
 
+    if (!data?.geometry || !Array.isArray(data.geometry)) {
+        console.error("Invalid route response:", data);
+        alert("Route could not be calculated.");
+        return;
+    }
+
     const geometry = data.geometry.map(p => [p.lat, p.lon]);
+
+    //const geometry = data.geometry.map(p => [p.lat, p.lon]);
 
     activeRouteLine = L.polyline(geometry, {
         weight: 6,
