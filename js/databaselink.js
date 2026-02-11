@@ -1,30 +1,31 @@
-export async function routeToRoom({ lat, lon, room, accessible = false, baseUrl = ""}){
+export async function routeToRoom({lat, lon, room, accessible = false, baseUrl = "" }){
     if (lat == null || lon == null || !room){
         throw new Error("routeToRoom requires lat, lon, and room");
     }
+    const url = new URL("/api/route-to-room", baseUrl || window.location.origin);
 
-    const url = new URL(`${baseUrl}/api/route-to-room`, window.location.origin);
     url.searchParams.set("lat", String(lat));
     url.searchParams.set("lon", String(lon));
     url.searchParams.set("room", String(room));
     url.searchParams.set("accessible", accessible ? "true" : "false");
 
-    const res = await fetch(url.toString(), {
+    const res = await fetch(url.toString(),{
         method: "GET",
-        headers: {Accept: "application/json" },
+        headers: {Accept: "application/json"},
     });
 
-    const text = await res.text();
-    let data;
-    try {
-        data = text ? JSON.parse(text) : null;
+    let data = null;
+
+    try{
+        data = await res.json();
     }catch{
-        data = { raw: text };
+        const raw = await res.text().catch(() => "");
+        data = {raw};
     }
 
-    if(!res.ok){
+    if (!res.ok){
         const msg =
-            (data && (data.error || data.detail)) ||
+            (data && (data.error || data.detail || data.message)) ||
             `Request failed (${res.status} ${res.statusText})`;
         throw new Error(msg);
     }
