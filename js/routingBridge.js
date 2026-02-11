@@ -3,9 +3,9 @@
 import {
     requestRoutePreview,
     startRoute,
-    clearRoute
+    clearActiveRoute
 } from './routing.js';
 
 window.requestRoutePreview = requestRoutePreview;
 window.startRoute = startRoute;
-window.clearRoute = clearRoute;
+window.clearActiveRoute = clearActiveRoute;
