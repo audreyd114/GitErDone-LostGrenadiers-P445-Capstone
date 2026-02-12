@@ -12,6 +12,14 @@ import {
     clearActiveRoute
 } from './routing.js';
 
+//Collapse nav pane toggle
+const controlPanel = document.getElementById("controlPanel");
+const collapseBtn = document.getElementById("collapsePanelBtn");
+
+collapseBtn.addEventListener("click", () => {
+    controlPanel.classList.toggle("collapsed");
+});
+
 // Locate user
 async function handleLocate(buttonEl) {
 
