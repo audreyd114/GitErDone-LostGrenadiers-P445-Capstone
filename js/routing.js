@@ -94,3 +94,9 @@ export function clearActiveRoute() {
     /*routeActive = false;
     showBuildingMarkers?.();*/
 }
+
+export function clearAllRoutes() {
+    clearPreviewRoute();
+    clearActiveRoute();
+    lastPreview = null;
+}

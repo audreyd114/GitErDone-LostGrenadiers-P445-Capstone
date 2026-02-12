@@ -9,7 +9,8 @@ import {
     requestRoutePreview,
     startRoute,
     clearPreviewRoute,
-    clearActiveRoute
+    clearActiveRoute,
+    clearAllRoutes
 } from './routing.js';
 
 //Collapse nav pane toggle
@@ -134,9 +135,23 @@ function showApproveRouteModal(roomCode) {
 }
 
 //clear route
-document
-    .getElementById('clearBtn')
-    ?.addEventListener('click', clearActiveRoute);
+function clearEverything() {
+
+    // Clear preview and active route
+    clearAllRoutes();
+
+    // Stop follow snapping
+    follow = false;
+
+    // Hide modal if open
+    appModal.classList.add("hidden");
+
+    console.log("Route fully cleared.");
+}
+
+document.getElementById('clearBtn')
+    ?.addEventListener('click', clearEverything);
+
 
 // welcome popup
 window.map.whenReady(() => {
@@ -147,163 +162,3 @@ window.map.whenReady(() => {
         )
         .openOn(window.map);
 });
-
-/*document.getElementById('searchBtn').addEventListener('click', async () => {
-    const q = searchInput.value.trim();
-    if (!q) return;
-
-    const parsedRoom = parseRoomSearch?.(q);
-
-    if (parsedRoom) {
-        if (!userMarker) {
-            alert("Press Locate first so routing can take place.");
-            return;
-        }
-
-        const { buildingCode, roomNumber } = parsedRoom;
-        const roomCode = `${buildingCode}-${roomNumber}`;
-
-        const userLatLng = userMarker.getLatLng();
-
-        await requestRoutePreview(
-            [userLatLng.lat, userLatLng.lng],
-            roomCode,
-            document.getElementById('accessibleToggle').checked
-        );
-
-        showApproveRouteModal({
-            startLabel: "Your Location",
-            endLabel: roomCode
-        });
-
-        return;
-    }
-
-    alert('No building or room found.');
-});*/
-
-/*document.getElementById('searchBtn').addEventListener('click', ()=>{
-    const q = searchInput.value.trim();
-    if(!q) return;
-    // For now, try to match building code or name from sample dataset
-    const found = buildings.find(b=> (b.id && b.id.toLowerCase()===q.toLowerCase()) || b.name.toLowerCase().includes(q.toLowerCase()));
-    if(found){
-        map.setView(found.coords, 19);
-        L.popup().setLatLng(found.coords).setContent(`<strong>${found.name}</strong><br/>${found.id}`).openOn(map);
-        // Request route from user's current position to building
-        if(userMarker){
-            const userLatLng = userMarker.getLatLng();
-            requestRoute([userLatLng.lat, userLatLng.lng], found.coords);
-        } else {
-            // no user position yet - draw mock route from center
-            requestRoute(map.getCenter(), found.coords);
-        }
-    } else {
-        alert('No building found in the sample dataset.');
-    }
-});*/
-/*
-function showApproveRouteModal({ startLabel, endLabel }) {
-    showModal({
-        title: "Start Route?",
-        message:
-            `You're about to start navigation.\n\nFrom: ${startLabel}\nTo: ${endLabel}`,
-        confirmText: "Start",
-        cancelText: "Cancel",
-        onConfirm: () => {
-            const userLatLng = userMarker.getLatLng();
-
-            startRoute(
-                [userLatLng.lat, userLatLng.lng],
-                endLabel,
-                document.getElementById('accessibleToggle').checked
-            );
-        },
-        onCancel: () => {
-            clearPreviewRoute();
-        }
-    });
-}*/
-/*
-// Accessibility: keyboard shortcut (f) to locate
-window.addEventListener('keydown', (e)=>{
-    if(e.key === 'f'){
-        document.getElementById('locateBtn').click();
-    }
-});
-
-// Panel Locate mirrors header Locate
-document.getElementById('panelLocateBtn')
-    .addEventListener('click', () => {
-        document.getElementById('locateBtn').click();
-    });
-
-// Accessible toggle (UI only for now)
-document.getElementById('accessibleToggle')
-    .addEventListener('change', (e) => {
-        console.log('Accessible route:', e.target.checked);
-        // Later: pass flag into requestRoute()
-    });
-*/
-// Floor buttons
-/*document.querySelectorAll('#panelFloorSelector button')
-    .forEach(btn => {
-        btn.addEventListener('click', () => {
-            const floor = btn.dataset.floor;
-            setIndoorFloor?.(floor);
-        });
-    });
-
- */
-/*
-const appModal = document.getElementById("appModal");
-const modalTitle = document.getElementById("modalTitle");
-const modalMessage = document.getElementById("modalMessage");
-const modalConfirmBtn = document.getElementById("modalConfirmBtn");
-const modalCancelBtn = document.getElementById("modalCancelBtn");
-
-let modalConfirmCallback = null;
-
-function showModal({ title, message, confirmText = "OK", cancelText = "Cancel", onConfirm }) {
-    modalTitle.textContent = title;
-    modalMessage.textContent = message;
-
-    modalConfirmBtn.textContent = confirmText;
-    modalCancelBtn.textContent = cancelText;
-
-    modalCancelBtn.style.display = cancelText ? 'inline-block' : 'none';
-
-    modalConfirmCallback = onConfirm || null;
-
-    appModal.classList.remove("hidden");
-}
-
-function closeModal() {
-    appModal.classList.add("hidden");
-    modalConfirmCallback = null;
-}
-
-modalConfirmBtn.addEventListener("click", () => {
-    if (modalConfirmCallback) modalConfirmCallback();
-    closeModal();
-});
-
-modalCancelBtn.addEventListener("click", closeModal);
-
-document.getElementById('clearBtn')
-    ?.addEventListener('click', clearActiveRoute);
-
-// On load: show a small welcome popup
-window.map.whenReady(() => {
-    L.popup({
-        autoClose: true,
-        closeOnClick: true
-    })
-        .setLatLng(window.map.getCenter())
-        .setContent('<strong>Welcome!</strong><br/>Search for buildings or press "Locate" to center on your device.')
-        .openOn(window.map);
-});
-
-window.showModal = showModal;
-window.closeModal = closeModal;
-*/
