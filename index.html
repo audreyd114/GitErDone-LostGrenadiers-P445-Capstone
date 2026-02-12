@@ -59,11 +59,14 @@
             </div>
         </div>
 
-
         <aside class="panel" id="controlPanel" aria-label="Map controls">
             <h3>Navigation Controls</h3>
+            <button id="collapsePanelBtn" class="collapse-btn" aria-label="Toggle panel">
+                ☰
+            </button>
+            <div id="panelContent">
 
-            <button id="panelLocateBtn">Locate</button>
+            <button id="panelLocateBtn">Locate Me</button>
             <button id="clearBtn">Clear Route</button>
 
             <div class="toggle-row">
@@ -96,14 +99,15 @@
                     <button data-floor="5">5</button>
                 </div>
             </div>
-            <div id="appModal" class="modal hidden">
-                <div class="modal-content">
-                    <h2 id="modalTitle"></h2>
-                    <p id="modalMessage"></p>
+                <div id="appModal" class="modal hidden">
+                    <div class="modal-content">
+                        <h2 id="modalTitle"></h2>
+                        <p id="modalMessage"></p>
 
-                    <div class="modal-actions">
-                        <button id="modalCancelBtn">Cancel</button>
-                        <button id="modalConfirmBtn" class="primary">OK</button>
+                        <div class="modal-actions">
+                            <button id="modalCancelBtn">Cancel</button>
+                            <button id="modalConfirmBtn" class="primary">OK</button>
+                        </div>
                     </div>
                 </div>
             </div>
