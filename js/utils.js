@@ -3,6 +3,12 @@ Utils.js
 Utility/helper functions like position watching, orientation, etc.
  */
 
+let lastPanTime = 0;
+const SNAP_INTERVAL = 1500; // milliseconds (1.5 seconds)
+let lastPanLatLng = null;
+const MIN_DISTANCE = 4; // meters
+
+
 function startWatchingPosition() {
     if (!navigator.geolocation) {
         console.warn('Geolocation not supported');
@@ -101,8 +107,19 @@ function onLocationFound(e) {
         userMarker.setLatLng(latlng);
     }
 
-    if (follow) {
-        map.setView(latlng, map.getZoom(), { animate: true });
+    if (follow && now - lastPanTime > SNAP_INTERVAL) {
+
+        if (!lastPanLatLng ||
+            latlng.distanceTo(lastPanLatLng) > MIN_DISTANCE) {
+
+            map.panTo(latlng, {
+                animate: true,
+                duration: 0.6
+            });
+
+            lastPanLatLng = latlng;
+            lastPanTime = now;
+        }
     }
 }
 
