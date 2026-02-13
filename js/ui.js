@@ -158,7 +158,7 @@ window.map.whenReady(() => {
     L.popup({ autoClose: true })
         .setLatLng(map.getCenter())
         .setContent(
-            '<strong>Welcome!</strong><br>Search for buildings or press "Locate" to center on your device.'
+            '<strong>Welcome!</strong><br>Search for buildings or press "Locate Me" to center on your device.'
         )
         .openOn(window.map);
 });
