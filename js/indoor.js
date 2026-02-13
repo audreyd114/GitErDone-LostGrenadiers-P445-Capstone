@@ -14,7 +14,7 @@ window.isIndoorMode = () => indoorMode;
 const unavailableFloors = {
     PS: [1],
     HH: [3, 4, 5],
-    KV: [1, 2, 3],
+    KV: [3],
     LI: [1, 2, 3, 4],
     OG: [1, 2, 3, 4],
     US: [1, 2, 3, 4, 5]
