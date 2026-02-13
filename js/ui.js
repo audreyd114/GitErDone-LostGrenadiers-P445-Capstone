@@ -61,7 +61,7 @@ searchBtn.addEventListener('click', async () => {
     if (!q) return;
 
     if (!userMarker) {
-        alert('Press Locate first so we know where to route you from.');
+        alert('Press Locate Me first so we know where to route you from.');
         return;
     }
 
@@ -152,13 +152,27 @@ function clearEverything() {
 document.getElementById('clearBtn')
     ?.addEventListener('click', clearEverything);
 
+//Accessible route toggle
+const accessibleToggle = document.getElementById("accessibleToggle");
+accessibleToggle.addEventListener("change", () => {
+    console.log("Accessible mode:", accessibleToggle.checked);
+
+    // If a preview is currently shown, regenerate it
+    if (window.lastPreviewData) {
+        requestRoutePreview(
+            window.lastPreviewData.fromLatLng,
+            window.lastPreviewData.room,
+            accessibleToggle.checked
+        );
+    }
+});
 
 // welcome popup
 window.map.whenReady(() => {
     L.popup({ autoClose: true })
         .setLatLng(map.getCenter())
         .setContent(
-            '<strong>Welcome!</strong><br>Search for buildings or press "Locate" to center on your device.'
+            '<strong>Welcome!</strong><br>Search for buildings or press "Locate Me" to center on your device.'
         )
         .openOn(window.map);
 });
