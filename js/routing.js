@@ -12,14 +12,14 @@ let activeRouteLine = null;
 let lastPreview = null;
 
 // route request as a PREVIEW. not active
-export async function requestRoutePreview(fromLatLng, room, accessible = false) {
+export async function requestRoutePreview(fromLatLng, room, accessibleMode) {
     clearAllRoutes();
 
     const data = await routeToRoom({
         lat: fromLatLng[0],
         lon: fromLatLng[1],
         room,
-        accessible
+        accessibleMode
     });
 
     if (!data.found || !Array.isArray(data.path)) {
@@ -38,7 +38,7 @@ export async function requestRoutePreview(fromLatLng, room, accessible = false) 
 
     map.fitBounds(previewRouteLine.getBounds(), {padding: [40, 40]});
 
-    lastPreview = {fromLatLng, room, accessible};
+    lastPreview = {fromLatLng, room, accessibleMode};
 }
 
 // activate route
@@ -48,13 +48,13 @@ export async function startRoute() {
     clearPreviewRoute();
     clearActiveRoute();
 
-    const {fromLatLng, room, accessible} = lastPreview;
+    const {fromLatLng, room, accessibleMode} = lastPreview;
 
     const data = await routeToRoom({
         lat: fromLatLng[0],
         lon: fromLatLng[1],
         room,
-        accessible
+        accessibleMode
     });
 
     if (!data?.found || !Array.isArray(data.path)) {
