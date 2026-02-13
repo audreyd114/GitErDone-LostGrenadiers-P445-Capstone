@@ -13,7 +13,7 @@ let lastPreview = null;
 
 // route request as a PREVIEW. not active
 export async function requestRoutePreview(fromLatLng, room, accessible = false) {
-    clearPreviewRoute();
+    clearAllRoutes();
 
     const data = await routeToRoom({
         lat: fromLatLng[0],
