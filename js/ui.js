@@ -107,6 +107,23 @@ function showModal({ title, message, confirmText, cancelText, onConfirm }) {
     appModal.classList.remove('hidden');
 }
 
+const infoModal = document.getElementById("infoModal");
+const infoModalTitle = document.getElementById("infoModalTitle");
+const infoModalMessage = document.getElementById("infoModalMessage");
+const infoModalOkBtn = document.getElementById("infoModalOkBtn");
+
+function showInfoModal({ title, message }) {
+    infoModalTitle.textContent = title;
+    infoModalMessage.textContent = message;
+    infoModal.classList.remove("hidden");
+}
+
+infoModalOkBtn.addEventListener("click", () => {
+    infoModal.classList.add("hidden");
+});
+
+window.showInfoModal = showInfoModal;
+
 function closeModal() {
     appModal.classList.add('hidden');
     modalConfirmCallback = null;

@@ -167,3 +167,9 @@ input:checked + .slider:before {
 #controlPanel button {
     width: auto;
 }
+
+.modal-footer {
+    display: flex;
+    justify-content: center;
+    padding-top: 12px;
+}
