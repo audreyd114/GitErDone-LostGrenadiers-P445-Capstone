@@ -36,7 +36,11 @@ export async function requestRoutePreview(fromLatLng, room, accessibleMode) {
         dashArray: '6,8'
     }).addTo(map);
 
-    map.fitBounds(previewRouteLine.getBounds(), {padding: [40, 40]});
+    map.fitBounds(previewRouteLine.getBounds(), {
+        padding: [80, 80],
+        maxZoom: 18
+    });
+
 
     lastPreview = {fromLatLng, room, accessibleMode};
 }

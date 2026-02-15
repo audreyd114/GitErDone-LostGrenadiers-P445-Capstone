@@ -221,14 +221,11 @@ function showUnavailableFloorModal(buildingId, floorNum) {
     const buildingName =
         buildings.find(b => b.id === buildingId)?.name || buildingId;
 
-    showModal({
+    showInfoModal({
         title: "Floor Unavailable",
         message:
             `We're sorry. This floor is unavailable for indoor routing at the moment.
             ${buildingName} – Floor ${floorNum} will be available soon!`,
-        confirmText: "OK",
-        cancelText: "",
-        onConfirm: null
     });
 }
 
