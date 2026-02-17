@@ -97,6 +97,7 @@ const compassIcon = L.divIcon({
 });
 
 function onLocationFound(e) {
+    const now = Date.now();
     const latlng = e.latlng;
     if (!latlng) return;
 
