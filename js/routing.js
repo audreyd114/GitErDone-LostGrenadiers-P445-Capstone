@@ -32,17 +32,15 @@ export async function requestRoutePreview(fromLatLng, room, accessibleMode) {
         return;
     }
 
-    const [segment1 = [], segment2 = [], segment3 = []] = data.route;
-
 // Combine segments for preview
-    const fullGeometry = [
-        ...segment1,
-        ...segment2,
-        ...segment3
-    ].map(p => [p.lat, p.lon]);
+    const segments = Array.isArray(data.route) ? data.route : [];
 
+    const fullGeometry = segments
+        .flat()
+        .filter(Boolean)
+        .map(p => [p.lat, p.lon]);
 
-    const geometry = data.path.map(p => [p.lat, p.lon]);
+    //const geometry = data.path.map(p => [p.lat, p.lon]);
 
     previewRouteLine = L.polyline(fullGeometry, {
         weight: 6,
@@ -86,15 +84,14 @@ export async function startRoute() {
         return;
     }
 
-    const [segment1 = [], segment2 = [], segment3 = []] = data.route;
+    const segments = Array.isArray(data.route) ? data.route : [];
 
-    const fullGeometry = [
-        ...segment1,
-        ...segment2,
-        ...segment3
-    ].map(p => [p.lat, p.lon]);
+    const fullGeometry = segments
+        .flat()
+        .filter(Boolean)
+        .map(p => [p.lat, p.lon]);
 
-    const geometry = data.path.map(p => [p.lat, p.lon]);
+    //const geometry = data.path.map(p => [p.lat, p.lon]);
 
     activeRouteLine = L.polyline(fullGeometry, {
         weight: 6,
