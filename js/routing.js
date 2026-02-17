@@ -3,7 +3,7 @@ Routing.js
 All route polyline and preview display.
  */
 
-import { routeToRoom } from './databaselink.js';
+import { getFullRoute } from './databaselink.js';
 
 const {L, map} = window;
 
@@ -15,21 +15,36 @@ let lastPreview = null;
 export async function requestRoutePreview(fromLatLng, room, accessibleMode) {
     clearAllRoutes();
 
-    const data = await routeToRoom({
+    const data = await getFullRoute({
         lat: fromLatLng[0],
         lon: fromLatLng[1],
         room,
         accessibleMode
     });
 
+    /*
     if (!data.found || !Array.isArray(data.path)) {
+        console.error("Invalid route response:", data);
+        return;
+    }*/
+    if (!data?.found || !Array.isArray(data.route)) {
         console.error("Invalid route response:", data);
         return;
     }
 
+    const [segment1 = [], segment2 = [], segment3 = []] = data.route;
+
+// Combine segments for preview
+    const fullGeometry = [
+        ...segment1,
+        ...segment2,
+        ...segment3
+    ].map(p => [p.lat, p.lon]);
+
+
     const geometry = data.path.map(p => [p.lat, p.lon]);
 
-    previewRouteLine = L.polyline(geometry, {
+    previewRouteLine = L.polyline(fullGeometry, {
         weight: 6,
         color: '#2563eb',
         opacity: 0.6,
@@ -54,21 +69,34 @@ export async function startRoute() {
 
     const {fromLatLng, room, accessibleMode} = lastPreview;
 
-    const data = await routeToRoom({
+    const data = await getFullRoute({
         lat: fromLatLng[0],
         lon: fromLatLng[1],
         room,
         accessibleMode
     });
 
-    if (!data?.found || !Array.isArray(data.path)) {
+    /*if (!data?.found || !Array.isArray(data.path)) {
+        console.error("Invalid route response:", data);
+        return;
+    }*/
+
+    if (!data?.found || !Array.isArray(data.route)) {
         console.error("Invalid route response:", data);
         return;
     }
 
+    const [segment1 = [], segment2 = [], segment3 = []] = data.route;
+
+    const fullGeometry = [
+        ...segment1,
+        ...segment2,
+        ...segment3
+    ].map(p => [p.lat, p.lon]);
+
     const geometry = data.path.map(p => [p.lat, p.lon]);
 
-    activeRouteLine = L.polyline(geometry, {
+    activeRouteLine = L.polyline(fullGeometry, {
         weight: 6,
         color: '#2563eb'
     }).addTo(map);
