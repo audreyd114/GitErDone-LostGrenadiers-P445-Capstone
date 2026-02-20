@@ -1,0 +1,101 @@
+/*
+Indoor.css
+Indoor mode popup window.
+*/
+
+#indoorOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+}
+
+#indoorBackdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(2px);
+}
+
+#indoorWindow {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 90%;
+    max-width: 600px;
+    max-height: 90%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#indoorImage {
+    width: 100%;
+    height: auto;
+    max-height: 80vh;
+    object-fit: contain;
+}
+
+.closeBtn {
+    position: absolute;
+    right: 10px;
+    top: 6px;
+    background: transparent;
+    border: none;
+    font-size: 28px;
+    cursor: pointer;
+}
+
+#closeIndoor {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 999999;
+    background: rgba(0,0,0,0.4);
+    color: white;
+    border: none;
+    font-size: 22px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+#indoorWindow {
+    position: relative;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: white;
+    padding: 1.25rem 1.5rem;
+    border-radius: 10px;
+    max-width: 320px;
+    text-align: center;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+.modal-actions button.primary {
+    font-weight: bold;
+}

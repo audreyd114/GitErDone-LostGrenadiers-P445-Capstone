@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <title>Lost Grenadiers</title>
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/map.css">
+        <link rel="stylesheet" href="css/indoor.css">
+        <link rel="stylesheet" href="css/ui.css">
+</head>
+<body>
+<div id="app">
+    <header>
+        <div class="logo">Lost Grenadiers</div>
+        <div class="search-wrap">
+            <input id="search" type="search" placeholder="Search building or room (e.g. LF 119)" aria-label="Search building or room" />
+            <button id="searchBtn" aria-label="Search">Go</button>
+        </div>
+    </header>
+
+    <main>
+        <div id="map" role="application" aria-label="Campus map"></div>
+
+        <div id="floorSelector" style="
+            position:absolute;
+            left:12px;
+            top:130px;
+            z-index:1200;
+            background:white;
+            padding:6px;
+            border-radius:8px;
+            box-shadow:0 2px 6px rgba(0,0,0,.2);
+            display:none;
+">
+            <button data-floor="1">1F</button>
+            <button data-floor="2">2F</button>
+            <button data-floor="3">3F</button>
+            <button data-floor="4">4F</button>
+            <button data-floor="5">5F</button>
+        </div>
+
+        <div id="indoorOverlay" hidden>
+            <div id="indoorBackdrop"></div>
+
+            <div id="indoorWindow">
+                <button id="closeIndoor" class="closeBtn">x</button>
+
+                <div id="indoorHeader">
+                    <h2 id="indoorTitle">Building Name</h2>
+                    <select id="floorSelect"></select>
+                </div>
+
+                <img id="indoorImage" src="" alt="Floor Plan">
+            </div>
+        </div>
+
+        <aside class="panel" id="controlPanel" aria-label="Map controls">
+            <h3>Navigation Controls</h3>
+            <button id="collapsePanelBtn" class="collapse-btn" aria-label="Toggle panel">
+                ☰
+            </button>
+            <div id="panelContent">
+
+            <button id="panelLocateBtn">Locate Me</button>
+            <button id="clearBtn">Clear Route</button>
+
+            <div class="toggle-row">
+                <div class="toggle-row">
+                    <span>Accessible Route</span>
+                    <label class="switch">
+                        <input type="checkbox" id="accessibleToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="toggle-row">
+                <div class="toggle-row">
+                    <span>Indoor Mode</span>
+                    <label class="switch">
+                        <input type="checkbox" id="indoorToggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div id="panelFloorSelector">
+                <div class="floor-label">Floor</div>
+                <div class="floor-buttons">
+                    <button data-floor="1">1</button>
+                    <button data-floor="2">2</button>
+                    <button data-floor="3">3</button>
+                    <button data-floor="4">4</button>
+                    <button data-floor="5">5</button>
+                </div>
+            </div>
+                <div id="appModal" class="modal hidden">
+                    <div class="modal-content">
+                        <h2 id="modalTitle"></h2>
+                        <p id="modalMessage"></p>
+
+                        <div class="modal-actions">
+                            <button id="modalCancelBtn">Cancel</button>
+                            <button id="modalConfirmBtn" class="primary">OK</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="infoModal" class="modal hidden">
+                    <div class="modal-content">
+                        <h2 id="infoModalTitle"></h2>
+                        <p id="infoModalMessage"></p>
+
+                        <div class="modal-footer">
+                            <button id="infoModalOkBtn" class="primary-btn">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
+</div>
+
+<!-- Leaflet JS
+Notes for backend integration points:
+- Replace 'buildings' dataset with an API call to /api/buildings (GET) that returns ids, names, and coordinates.
+- Implement /api/route (POST or GET) to return a JSON object like: {geometry: [[lat,lng],...], steps:[{text:...}, ...]}
+- Indoor floor plans should be delivered as tiled layers or GeoJSON polygons (use LayerGroup for floors).
+- trigger linguist
+-->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<!-- Leaflet rotated image overlay plugin -->
+<script src="https://unpkg.com/leaflet-imageoverlay-rotated/Leaflet.ImageOverlay.Rotated.js"></script>
+
+<script src="js/mapInit.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/buildings.js"></script>
+<script src="js/indoor.js"></script>
+<script type="module" src="js/routingBridge.js"></script>
+<script type="module" src="js/ui.js"></script>
+
+</body>
+</html>
