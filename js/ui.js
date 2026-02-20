@@ -12,6 +12,11 @@ import {
     clearActiveRoute,
     clearAllRoutes
 } from './routing.js';
+import{
+    startWatchingPosition,
+    stopWatchingPosition,
+    isTrackingPosition
+} from "./utils.js";
 
 //Collapse nav pane toggle
 const controlPanel = document.getElementById("controlPanel");
@@ -35,12 +40,31 @@ async function handleLocate(buttonEl) {
         }
     }
 
-    follow = true;
+    if (isTrackingPosition()) {
+        stopWatchingPosition();
+        follow = false;
 
+        if (userMarker) {
+            map.removeLayer(userMarker);
+            userMarker = null;
+        }
+
+        buttonEl.textContent = "Locate Me";
+        console.log("Tracking stopped");
+        return;
+    }
+
+    follow = true;
+    startWatchingPosition();
+
+    buttonEl.textContent = 'Locating…';
+    console.log("Tracking started");
+
+    /*
     if (!watchId) {
         startWatchingPosition();
         buttonEl.textContent = 'Locating…';
-    }
+    }*/
 
     if (userMarker) {
         map.setView(userMarker.getLatLng(), 18, { animate: true });
