@@ -3,7 +3,7 @@ Buildings.js
 Handles building data, markers, and clicks.
 */
 
-// Example building markers (replace with real building geometry fetched from server)
+// Building markers
 const buildings = [
     {id:'LF', name:'Life Sciences', coords:[38.34301, -85.81912]},
     {id:'PS', name:'Physical Sciences', coords:[38.3434606, -85.8181217]},
@@ -31,37 +31,4 @@ window.showBuildingMarkers = () => {
     buildingMarkers.forEach(m => m.addTo(map));
 };
 
-
-/*
-buildings.forEach(b => {
-    const m = L.marker(b.coords)
-        .addTo(outdoorLayer)
-        .on("click", () => {
-
-            if (!indoorMode) return;
-
-            openIndoorView(
-                {
-                    name: b.name,
-                    code: b.id,
-                    floors: buildingFloors[b.id] || 1
-                },
-                1
-            );
-        });
-});
-
-const buildingMarkerGroup = L.layerGroup().addTo(outdoorLayer);
-
-function hideBuildingMarkers() {
-    if (map.hasLayer(buildingMarkerGroup)) {
-        map.removeLayer(buildingMarkerGroup);
-    }
-}
-
-function showBuildingMarkers() {
-    if (!map.hasLayer(buildingMarkerGroup)) {
-        map.addLayer(buildingMarkerGroup);
-    }
-}
-*/
+window.buildings = buildings;
