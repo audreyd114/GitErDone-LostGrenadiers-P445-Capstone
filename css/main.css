@@ -60,12 +60,12 @@ input[type="search"] {
     padding: 8px;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
-    font-size: 14px;
+    font-size: 16px;
 }
 
 header button {
     padding: 6px 8px;
-    font-size: 13px;
+    font-size: 16px;
     white-space: nowrap;
 }
 
