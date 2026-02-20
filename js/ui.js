@@ -1,6 +1,6 @@
 /*
 UI.js
-User interface controls like locate, follow, search, keyboard shortcuts, welcome popup.
+User interface controls like locate, search, modal popups, ect.
  */
 
 console.log('ui.js loaded');
@@ -56,6 +56,70 @@ document.getElementById('panelLocateBtn')
 const searchInput = document.getElementById('search');
 const searchBtn = document.getElementById(('searchBtn'));
 
+function resolveBuildingCode(input) {
+    const normalized = input.trim().toLowerCase();
+
+    const match = window.buildings.find(b =>
+        b.id.toLowerCase() === normalized ||
+        b.name.toLowerCase().includes(normalized)
+    );
+
+    return match ? match.id : null;
+}
+
+searchBtn.addEventListener('click', async() => {
+    const q = searchInput.value.trim();
+    if (!q) return;
+
+    if (!userMarker) {
+        alert('Press Locate Me first so we know where to route you from.');
+        return;
+    }
+
+    const userLatLng = userMarker.getLatLng();
+
+    // Check if it's building + room input
+    const roomMatch = q.match(/^([A-Za-z]{2})[\s-]?(\d{2,4})$/);
+
+    if (roomMatch) {
+        const buildingCode = roomMatch[1].toUpperCase();
+        const roomNumber = roomMatch[2];
+        const roomCode = `${buildingCode}-${roomNumber}`;
+
+        await requestRoutePreview(
+            [userLatLng.lat, userLatLng.lng],
+            roomCode,
+            document.getElementById('accessibleToggle').checked
+        );
+
+        showApproveRouteModal(roomCode);
+        return;
+    }
+
+    // Check if it's building input only
+    const buildingCode = resolveBuildingCode(q);
+
+    if (buildingCode) {
+        await requestRoutePreview(
+            [userLatLng.lat, userLatLng.lng],
+            buildingCode,
+            document.getElementById('accessibleToggle').checked
+        );
+
+        showApproveRouteModal(buildingCode);
+        return;
+    }
+
+    alert("Building or room not recognized.");
+    });
+
+    searchInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            searchBtn.click();
+        }
+});
+
+/*
 searchBtn.addEventListener('click', async () => {
     const q = searchInput.value.trim();
     if (!q) return;
@@ -85,7 +149,7 @@ searchBtn.addEventListener('click', async () => {
     );
 
     showApproveRouteModal(roomCode);
-});
+});*/
 
 //Modal
 const appModal = document.getElementById('appModal');
