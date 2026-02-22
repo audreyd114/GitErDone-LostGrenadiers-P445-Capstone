@@ -13,10 +13,10 @@ window.isIndoorMode = () => indoorMode;
 
 const unavailableFloors = {
     PS: [1],
-    KV: [3],
     LI: [1, 2, 3, 4],
     OG: [1, 2, 3, 4],
-    US: [1, 2, 3, 4, 5]
+    US: [1, 2, 3, 4, 5],
+    UC: [1, 2, 3, 4, 5]
 }
 
 function isFloorUnavailable(buildingId, floorNum) {
