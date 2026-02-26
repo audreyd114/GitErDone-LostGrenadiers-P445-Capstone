@@ -10,7 +10,8 @@ import {
     startRoute,
     clearPreviewRoute,
     clearActiveRoute,
-    clearAllRoutes
+    clearAllRoutes,
+    getLastRouteMeta
 } from './routing.js';
 import{
     startWatchingPosition,
@@ -228,9 +229,15 @@ modalCancelBtn.addEventListener('click', () => {
 });
 
 function showApproveRouteModal(roomCode) {
+    const meta = getLastRouteMeta();
+    const minutesText = typeof meta?.minutes === "number"
+        ? `<div style="margin-top:8px;font-size:18px;font-weight:700;color:#990000;">
+             ${meta.minutes} minute${meta.minutes === 1 ? "" : "s"}
+           </div>`
+        : "";
     showModal({
         title: 'Start Route?',
-        message: `Navigate to ${roomCode}?`,
+        message: `Navigate to ${roomCode}?${minutesText}`,
         confirmText: 'Start',
         cancelText: 'Cancel',
         onConfirm: () => {

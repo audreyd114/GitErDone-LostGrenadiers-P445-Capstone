@@ -10,6 +10,7 @@ const {L, map} = window;
 let previewRouteLine = null;
 let activeRouteLine = null;
 let lastPreview = null;
+let lastRouteMeta = null;
 
 // route request as a PREVIEW. not active
 export async function requestRoutePreview(fromLatLng, room, accessibleMode) {
@@ -32,15 +33,29 @@ export async function requestRoutePreview(fromLatLng, room, accessibleMode) {
         return;
     }
 
-// Combine segments for preview
-    const segments = Array.isArray(data.route) ? data.route : [];
+    // Combine segments for preview
+    const route = Array.isArray(data.route) ? data.route : [];
 
-    const fullGeometry = segments
-        .flat()
-        .filter(Boolean)
+    // Destructure
+    const [
+        toBuilding = [],
+        toRoom = [],
+        entryFloor = null,
+        minutes = null
+    ] = route;
+
+    // Combine only the coordinate arrays
+    const fullGeometry = [...toBuilding, ...toRoom]
+        .filter(p => p?.lat !== undefined && p?.lon !== undefined)
         .map(p => [p.lat, p.lon]);
 
-    //const geometry = data.path.map(p => [p.lat, p.lon]);
+    // Store metadata for UI
+    lastRouteMeta = {
+        entryFloor,
+        minutes};
+
+        console.log("Entry floor:", entryFloor);
+    console.log("Route minutes:", minutes);
 
     previewRouteLine = L.polyline(fullGeometry, {
         weight: 6,
@@ -84,14 +99,27 @@ export async function startRoute() {
         return;
     }
 
-    const segments = Array.isArray(data.route) ? data.route : [];
+    const route = Array.isArray(data.route) ? data.route : [];
 
-    const fullGeometry = segments
-        .flat()
-        .filter(Boolean)
+    // Destructure
+    const [
+        toBuilding = [],
+        toRoom = [],
+        entryFloor = null,
+        minutes = null
+    ] = route;
+
+    // Combine only the coordinate arrays
+    const fullGeometry = [...toBuilding, ...toRoom]
+        .filter(p => p?.lat !== undefined && p?.lon !== undefined)
         .map(p => [p.lat, p.lon]);
 
-    //const geometry = data.path.map(p => [p.lat, p.lon]);
+    console.log("Entry floor:", entryFloor);
+    console.log("Route minutes:", minutes);
+
+    if (entryFloor !== null && window.setIndoorFloor) {
+        window.setIndoorFloor(entryFloor);
+    }
 
     activeRouteLine = L.polyline(fullGeometry, {
         weight: 6,
@@ -128,4 +156,8 @@ export function clearAllRoutes() {
     clearPreviewRoute();
     clearActiveRoute();
     lastPreview = null;
+}
+
+export function getLastRouteMeta() {
+    return lastRouteMeta;
 }
