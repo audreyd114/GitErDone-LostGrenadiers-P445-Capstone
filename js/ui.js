@@ -232,6 +232,7 @@ function showApproveRouteModal(roomCode) {
     const meta = getLastRouteMeta();
     const minutesText = typeof meta?.minutes === "number"
         ? `<div class="route-time">
+             <img src="img/grenadier.png" class="route-icon" alt="grenadier">
              ${meta.minutes} minute${meta.minutes === 1 ? "" : "s"}
            </div>`
         : "";
