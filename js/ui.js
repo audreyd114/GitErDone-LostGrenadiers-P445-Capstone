@@ -187,7 +187,7 @@ let modalConfirmCallback = null;
 
 function showModal({ title, message, confirmText, cancelText, onConfirm }) {
     modalTitle.textContent = title;
-    modalMessage.textContent = message;
+    modalMessage.innerHTML = message;
 
     modalConfirmBtn.textContent = confirmText;
     modalCancelBtn.textContent = cancelText;
@@ -231,7 +231,7 @@ modalCancelBtn.addEventListener('click', () => {
 function showApproveRouteModal(roomCode) {
     const meta = getLastRouteMeta();
     const minutesText = typeof meta?.minutes === "number"
-        ? `<div style="margin-top:8px;font-size:18px;font-weight:700;color:#990000;">
+        ? `<div class="route-time">
              ${meta.minutes} minute${meta.minutes === 1 ? "" : "s"}
            </div>`
         : "";
