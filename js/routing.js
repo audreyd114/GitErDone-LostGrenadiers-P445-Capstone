@@ -12,6 +12,12 @@ let activeRouteLine = null;
 let lastPreview = null;
 let lastRouteMeta = null;
 
+let segmentToBuilding = null;
+let segmentToStairs = null;
+let segmentFinal = null;
+
+let currentRouteSegments = null;
+
 function parseRouteArray(routeArray) {
     if (!Array.isArray(routeArray) || routeArray.length < 5) {
         console.error("Unexpected route array format:", routeArray);
@@ -136,13 +142,23 @@ export async function startRoute() {
         minutes
     } = parsed;
 
-    const fullGeometry = [
-        ...routeToBuilding,
-        ...routeToStairs,
-        ...finalRouteSegment
-    ]
-        .filter(p => p?.lat !== undefined && p?.lon !== undefined)
-        .map(p => [p.lat, p.lon]);
+    currentRouteSegments = {
+        routeToBuilding,
+        routeToStairs,
+        finalRouteSegment,
+        entryFloor,
+        minutes
+    };
+
+    // Draw only outdoor segment first
+    if (routeToBuilding.length > 0) {
+        segmentToBuilding = L.polyline(
+            routeToBuilding.map(p => [p.lat, p.lon]),
+            { weight: 6, color: '#2563eb' }
+        ).addTo(map);
+
+        map.fitBounds(segmentToBuilding.getBounds(), { padding: [40, 40] });
+    }
 
     console.log("Entry floor:", entryFloor);
     console.log("Route minutes:", minutes);
@@ -174,12 +190,48 @@ export function clearPreviewRoute() {
 
 // clear active route
 export function clearActiveRoute() {
-    if (activeRouteLine) {
-        activeRouteLine.remove();
-        activeRouteLine = null;
+    if (segmentToBuilding) {
+        segmentToBuilding.remove();
+        segmentToBuilding = null;
     }
-    /*routeActive = false;
-    showBuildingMarkers?.();*/
+
+    if (segmentToStairs) {
+        segmentToStairs.remove();
+        segmentToStairs = null;
+    }
+
+    if (segmentFinal) {
+        segmentFinal.remove();
+        segmentFinal = null;
+    }
+
+    currentRouteSegments = null;
+}
+
+export function handleIndoorModeActivated() {
+    if (!currentRouteSegments) return;
+
+    const { routeToStairs } = currentRouteSegments;
+
+    if (routeToStairs.length > 0 && !segmentToStairs) {
+        segmentToStairs = L.polyline(
+            routeToStairs.map(p => [p.lat, p.lon]),
+            { weight: 6, color: '#2563eb' }
+        ).addTo(map);
+    }
+}
+
+export function handleFloorSelected(selectedFloor) {
+    if (!currentRouteSegments) return;
+
+    const { entryFloor, finalRouteSegment } = currentRouteSegments;
+
+    if (selectedFloor === entryFloor && finalRouteSegment.length > 0 && !segmentFinal) {
+        segmentFinal = L.polyline(
+            finalRouteSegment.map(p => [p.lat, p.lon]),
+            { weight: 6, color: '#2563eb' }
+        ).addTo(map);
+    }
 }
 
 export function clearAllRoutes() {
@@ -190,4 +242,8 @@ export function clearAllRoutes() {
 
 export function getLastRouteMeta() {
     return lastRouteMeta;
+}
+
+export function getActiveRouteEntryFloor() {
+    return currentRouteSegments?.entryFloor ?? null;
 }
