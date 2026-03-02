@@ -3,6 +3,12 @@ Indoor.js
 All indoor/floor overlay logic and indoor UI.
 */
 
+import {
+    handleIndoorModeActivated,
+    handleFloorSelected,
+    getActiveRouteEntryFloor
+} from "./routing.js";
+
 // INDOOR MODE + FLOOR OVERLAYS
 let indoorMode = false;
 let currentFloor = 2;
@@ -130,6 +136,19 @@ indoorToggle.addEventListener("change", () => {
 
     floorPanel.style.display = indoorMode ? "block" : "none";
 
+    if (indoorMode) {
+        handleIndoorModeActivated();
+
+        if (indoorMode && currentBuilding) {
+            const routeEntryFloor = getActiveRouteEntryFloor();
+
+            if (routeEntryFloor) {
+                currentFloor = routeEntryFloor;
+                loadFloorOverlay(currentBuilding, currentFloor);
+            }
+        }
+    }
+
     if (!indoorMode) {
         clearIndoorOverlay();
         currentBuilding = null;
@@ -154,8 +173,14 @@ buildings.forEach(b => {
             return;
         }
 
-        // Prefer floor 2, otherwise first available floor
-        currentFloor = floors.includes(2) ? 2 : floors[0];
+        const routeEntryFloor = getActiveRouteEntryFloor();
+
+        if (routeEntryFloor && floors.includes(routeEntryFloor)) {
+            currentFloor = routeEntryFloor;
+        } else {
+            // Default behavior
+            currentFloor = floors.includes(2) ? 2 : floors[0];
+        }
 
         loadFloorOverlay(currentBuilding, currentFloor);
     });
@@ -179,6 +204,8 @@ document.querySelectorAll("#panelFloorSelector button").forEach(btn => {
 
         currentFloor = selectedFloor;
         loadFloorOverlay(currentBuilding, currentFloor);
+
+        handleFloorSelected(selectedFloor);
     });
 });
 
