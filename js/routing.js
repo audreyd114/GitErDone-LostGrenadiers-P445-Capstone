@@ -12,6 +12,29 @@ let activeRouteLine = null;
 let lastPreview = null;
 let lastRouteMeta = null;
 
+function parseRouteArray(routeArray) {
+    if (!Array.isArray(routeArray) || routeArray.length < 5) {
+        console.error("Unexpected route array format:", routeArray);
+        return null;
+    }
+
+    const [
+        routeToBuilding = [],
+        routeToStairs = [],
+        finalRouteSegment = [],
+        entryFloor = null,
+        minutes = null
+    ] = routeArray;
+
+    return {
+        routeToBuilding: Array.isArray(routeToBuilding) ? routeToBuilding : [],
+        routeToStairs: Array.isArray(routeToStairs) ? routeToStairs : [],
+        finalRouteSegment: Array.isArray(finalRouteSegment) ? finalRouteSegment : [],
+        entryFloor: typeof entryFloor === "number" ? entryFloor : null,
+        minutes: typeof minutes === "number" ? minutes : null
+    };
+}
+
 // route request as a PREVIEW. not active
 export async function requestRoutePreview(fromLatLng, room, accessibleMode) {
     clearAllRoutes();
@@ -33,19 +56,22 @@ export async function requestRoutePreview(fromLatLng, room, accessibleMode) {
         return;
     }
 
-    // Combine segments for preview
-    const route = Array.isArray(data.route) ? data.route : [];
+    const parsed = parseRouteArray(data.route);
+    if (!parsed) return;
 
-    // Destructure
-    const [
-        toBuilding = [],
-        toRoom = [],
-        entryFloor = null,
-        minutes = null
-    ] = route;
+    const {
+        routeToBuilding,
+        routeToStairs,
+        finalRouteSegment,
+        entryFloor,
+        minutes
+    } = parsed;
 
-    // Combine only the coordinate arrays
-    const fullGeometry = [...toBuilding, ...toRoom]
+    const fullGeometry = [
+        ...routeToBuilding,
+        ...routeToStairs,
+        ...finalRouteSegment
+    ]
         .filter(p => p?.lat !== undefined && p?.lon !== undefined)
         .map(p => [p.lat, p.lon]);
 
@@ -99,18 +125,22 @@ export async function startRoute() {
         return;
     }
 
-    const route = Array.isArray(data.route) ? data.route : [];
+    const parsed = parseRouteArray(data.route);
+    if (!parsed) return;
 
-    // Destructure
-    const [
-        toBuilding = [],
-        toRoom = [],
-        entryFloor = null,
-        minutes = null
-    ] = route;
+    const {
+        routeToBuilding,
+        routeToStairs,
+        finalRouteSegment,
+        entryFloor,
+        minutes
+    } = parsed;
 
-    // Combine only the coordinate arrays
-    const fullGeometry = [...toBuilding, ...toRoom]
+    const fullGeometry = [
+        ...routeToBuilding,
+        ...routeToStairs,
+        ...finalRouteSegment
+    ]
         .filter(p => p?.lat !== undefined && p?.lon !== undefined)
         .map(p => [p.lat, p.lon]);
 
