@@ -46,24 +46,24 @@ export const searchAliases ={
     "writing center":{
         type: "room",
         value: "LI-330"
-    },/*
+    },
     // CS tutoring
     "cs tutor":{
         type: "room",
-        value: ""
+        value: "LF-115"
     },
     "cs tutoring":{
         type: "room",
-        value: ""
+        value: "LF-115"
     },
     "computer science tutor":{
         type: "room",
-        value: ""
+        value: "LF-115"
     },
     "computer science tutoring":{
         type: "room",
-        value: ""
-    },*/
+        value: "LF-115"
+    },
     // Math tutoring
     "math tutor":{
         type: "room",
