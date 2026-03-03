@@ -20,7 +20,7 @@ let currentRouteSegments = null;
 let activeIndoorPolyline = null;
 
 function parseRouteArray(routeArray) {
-    if (!Array.isArray(routeArray) || routeArray.length < 5) {
+    if (!Array.isArray(routeArray) || routeArray.length < 6) {
         console.error("Unexpected route array format:", routeArray);
         return null;
     }
@@ -30,7 +30,8 @@ function parseRouteArray(routeArray) {
         routeToStairs = [],
         finalRouteSegment = [],
         entryFloor = null,
-        minutes = null
+        minutes = null,
+        destinationFloor = null
     ] = routeArray;
 
     return {
@@ -38,7 +39,8 @@ function parseRouteArray(routeArray) {
         routeToStairs: Array.isArray(routeToStairs) ? routeToStairs : [],
         finalRouteSegment: Array.isArray(finalRouteSegment) ? finalRouteSegment : [],
         entryFloor: typeof entryFloor === "number" ? entryFloor : null,
-        minutes: typeof minutes === "number" ? minutes : null
+        minutes: typeof minutes === "number" ? minutes : null,
+        destinationFloor: typeof destinationFloor === "number" ? destinationFloor : null
     };
 }
 
@@ -140,7 +142,8 @@ export async function startRoute() {
         routeToStairs,
         finalRouteSegment,
         entryFloor,
-        minutes
+        minutes,
+        destinationFloor
     } = parsed;
 
     currentRouteSegments = {
@@ -219,31 +222,37 @@ function drawIndoorSegment(selectedFloor) {
     const {
         routeToStairs,
         finalRouteSegment,
-        entryFloor
+        entryFloor,
+        destinationFloor
     } = currentRouteSegments;
 
-    // Always clear previous indoor line
     if (activeIndoorPolyline) {
         map.removeLayer(activeIndoorPolyline);
         activeIndoorPolyline = null;
     }
+
+    const selected = Number(selectedFloor);
+    const entry = Number(entryFloor);
+    const dest = Number(destinationFloor);
 
     let segmentToDraw = [];
 
     const hasStairs = routeToStairs.length > 0;
 
     if (!hasStairs) {
-        // SAME FLOOR ROUTE
-        if (selectedFloor === entryFloor) {
+        // Same-floor route
+        if (selected === entry) {
             segmentToDraw = finalRouteSegment;
         }
     } else {
-        // MULTI FLOOR ROUTE
-        if (selectedFloor === entryFloor) {
+        // Multi-floor route
+        if (selected === entry) {
             segmentToDraw = routeToStairs;
-        } else {
+        }
+        else if (selected === dest) {
             segmentToDraw = finalRouteSegment;
         }
+        // Any other floor, nothing
     }
 
     if (!segmentToDraw.length) return;
