@@ -5,7 +5,7 @@
 
 export const searchAliases ={
     //McCullough Plaza/Clock tower
-    "mccullough": {
+    /*"mccullough": {
         type: "coordinates",
         value: [38.3446104128296, -85.82002694874234]
     },
@@ -21,7 +21,7 @@ export const searchAliases ={
     "library":{
         type: "coordinates",
         value: [38.34371031591948, -85.82085282478349]
-    },/*
+    },
     // Book Store
     "book store":{
         type: "room",
@@ -77,9 +77,9 @@ export const searchAliases ={
     "cafeteria":{
         type: "room",
         value: "UC-028"
-    },
+    }
     // Volleyball Courts
-    "volleyball court":{
+    /*"volleyball court":{
         type: "coordinates",
         value: [38.34691570631911, -85.8208653613938]
     },
@@ -105,5 +105,5 @@ export const searchAliases ={
     "bus stop":{
         type: "coordinates",
         value: [38.34488340429234, -85.81863426792924]
-    }
+    }*/
 }
