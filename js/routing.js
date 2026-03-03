@@ -155,6 +155,16 @@ export async function startRoute() {
         destinationFloor
     };
 
+    if (entryFloor !== null && window.activateIndoorModeForRoute) {
+        // Derive buildingId from the room or by matching it in buildings.js
+        const buildingId = window.buildings.find(b => room.startsWith(b.id))?.id;
+
+        if (buildingId) {
+            window.activateIndoorModeForRoute(buildingId, entryFloor);
+            handleFloorSelected(entryFloor); // show the indoor segment immediately
+        }
+    }
+
     // Draw only outdoor segment first
     if (routeToBuilding.length > 0) {
         segmentToBuilding = L.polyline(
