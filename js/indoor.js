@@ -12,7 +12,7 @@ import {
 let indoorMode = false;
 let currentFloor = 2;
 let currentBuilding = null;
-let currentOverlay = null;
+let currentOverlays = [];
 
 window.isIndoorMode = () => indoorMode;
 
@@ -223,29 +223,45 @@ document.querySelectorAll("#panelFloorSelector button").forEach(btn => {
 
 //Overlay loading
 async function loadFloorOverlay(buildingId, floorNum) {
-    console.log("loadFloorOverlay called:", buildingId, floorNum);
     clearIndoorOverlay();
 
-    const floorData = imageAnchors?.[buildingId]?.[floorNum];
-    if (!floorData) {
-        console.warn("No image anchors for", buildingId, "floor", floorNum);
-        return;
+    // Determine which overlays to load
+    let buildingsToLoad = [buildingId];
+
+    if (buildingId === "KV" || buildingId === "OG") {
+        buildingsToLoad = ["KV", "OG"];
     }
 
-    const { topLeft, topRight, bottomLeft } = floorData;
+    buildingsToLoad.forEach(id => {
 
-    const url = `/indoor/${buildingId}_floor${floorNum}.png`;
+        const floorData = imageAnchors?.[id]?.[floorNum];
+        if (!floorData) return;
 
-    currentOverlay = L.imageOverlay.rotated(
-        url,
-        topLeft,
-        topRight,
-        bottomLeft,
-        {
-            opacity: 0.95,
-            interactive: false
+        const { topLeft, topRight, bottomLeft } = floorData;
+
+        const url = `/indoor/${id}_floor${floorNum}.png`;
+
+        const overlay = L.imageOverlay.rotated(
+            url,
+            topLeft,
+            topRight,
+            bottomLeft,
+            {
+                opacity: 0.95,
+                interactive: false
+            }
+        ).addTo(map);
+
+        if (id === "OG") {
+            overlay.setZIndex(100);
         }
-    ).addTo(map);
+
+        if (id === "KV") {
+            overlay.setZIndex(200); // KV always on top
+        }
+
+        currentOverlays.push(overlay);
+    });
 }
 
 const floorModal = document.getElementById("floorUnavailableModal");
@@ -269,8 +285,8 @@ function showUnavailableFloorModal(buildingId, floorNum) {
 
 //cleanup
 function clearIndoorOverlay() {
-    if (currentOverlay) {
-        map.removeLayer(currentOverlay);
-        currentOverlay = null;
-    }
+    currentOverlays.forEach(overlay => {
+        map.removeLayer(overlay);
+    });
+    currentOverlays = [];
 }
