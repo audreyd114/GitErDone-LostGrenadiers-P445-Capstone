@@ -62,7 +62,7 @@ Controls
 
 .toggle-row {
     margin-top: 10px;
-    font-size: 14px;
+    font-size: 16px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -172,4 +172,22 @@ input:checked + .slider:before {
     display: flex;
     justify-content: center;
     padding-top: 12px;
+}
+
+.route-time {
+    margin-top: 8px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #990000;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.route-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
 }

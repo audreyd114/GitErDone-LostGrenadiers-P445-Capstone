@@ -3,6 +3,11 @@ Indoor.js
 All indoor/floor overlay logic and indoor UI.
 */
 
+import {
+    handleFloorSelected,
+    getActiveRouteEntryFloor
+} from "./routing.js";
+
 // INDOOR MODE + FLOOR OVERLAYS
 let indoorMode = false;
 let currentFloor = 2;
@@ -13,11 +18,10 @@ window.isIndoorMode = () => indoorMode;
 
 const unavailableFloors = {
     PS: [1],
-    HH: [5],
-    KV: [3],
     LI: [1, 2, 3, 4],
     OG: [1, 2, 3, 4],
-    US: [1, 2, 3, 4, 5]
+    US: [1, 2, 3, 4, 5],
+    UC: [1, 2, 3, 4, 5]
 }
 
 function isFloorUnavailable(buildingId, floorNum) {
@@ -76,14 +80,14 @@ const imageAnchors = {
     },
     HH: {
         1: {
-            topLeft: [38.34457103, -85.82085055],
-            topRight: [38.34453663, -85.82043964],
-            bottomLeft: [38.34416606, -85.82090770]
+            topLeft: [38.34457682, -85.82087089],
+            topRight: [38.34454481, -85.82048972],
+            bottomLeft: [38.34416585, -85.82092561]
         },
         2: {
-            topLeft: [38.34460928, -85.82095303],
-            topRight: [38.34455460, -85.82036722],
-            bottomLeft: [38.34413920, -85.82102299]
+            topLeft: [38.34460519, -85.82088481],
+            topRight: [38.34456445, -85.82043408],
+            bottomLeft: [38.34412948, -85.82095807]
         },
         3: {
             topLeft: [38.34460753, -85.82090301],
@@ -113,9 +117,9 @@ const imageAnchors = {
             bottomLeft: [38.3465009, -85.8203224]
         },
         3: {
-            topLeft: [38.3473728, -85.8201864],
-            topRight: [38.3473024, -85.8194199],
-            bottomLeft: [38.34653052, -85.82031366]
+            topLeft: [38.34740615, -85.82019197],
+            topRight: [38.34732396, -85.81930581],
+            bottomLeft: [38.34650315, -85.82032923]
         }
     }
 }
@@ -130,6 +134,11 @@ indoorToggle.addEventListener("change", () => {
     indoorMode = indoorToggle.checked;
 
     floorPanel.style.display = indoorMode ? "block" : "none";
+
+    if (indoorMode) {
+        clearIndoorOverlay();
+        currentBuilding = null;
+    }
 
     if (!indoorMode) {
         clearIndoorOverlay();
@@ -155,8 +164,14 @@ buildings.forEach(b => {
             return;
         }
 
-        // Prefer floor 2, otherwise first available floor
-        currentFloor = floors.includes(2) ? 2 : floors[0];
+        const routeEntryFloor = getActiveRouteEntryFloor();
+
+        if (routeEntryFloor !==null && floors.includes(routeEntryFloor)) {
+            currentFloor = routeEntryFloor;
+        } else {
+            // Default behavior
+            currentFloor = floors.includes(2) ? 2 : floors[0];
+        }
 
         loadFloorOverlay(currentBuilding, currentFloor);
     });
@@ -180,6 +195,8 @@ document.querySelectorAll("#panelFloorSelector button").forEach(btn => {
 
         currentFloor = selectedFloor;
         loadFloorOverlay(currentBuilding, currentFloor);
+
+        handleFloorSelected(selectedFloor);
     });
 });
 

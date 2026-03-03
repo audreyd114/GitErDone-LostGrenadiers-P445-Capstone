@@ -7,7 +7,11 @@ let lastPanTime = 0;
 const SNAP_INTERVAL = 1500; // milliseconds (1.5 seconds)
 let lastPanLatLng = null;
 const MIN_DISTANCE = 4; // meters
+let watchId = null;
 
+function isTrackingPosition() {
+    return watchId !== null;
+}
 
 function startWatchingPosition() {
     if (!navigator.geolocation) {
@@ -167,4 +171,8 @@ function smoothHeading(newHeading){
     return lastHeading;
 }
 
-
+export{
+    startWatchingPosition,
+    stopWatchingPosition,
+    isTrackingPosition
+}

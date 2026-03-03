@@ -3,11 +3,6 @@ MapInit.js
 Responsible for creating the Leaflet map, tile layers, and basic map setup
  */
 
-// Basic map + UI skeleton for Lost Grenadiers
-// This file is intentionally dependency-light. When backend and routing libs are ready:
-//  - Replace mockRoute() with a call to the backend /api/route
-//  - Optionally add leaflet-routing-machine or pgrouting-based tile/layer
-
 window.map = L.map('map', {zoomControl:true}).setView([38.34505, -85.81951], 17); // IUS
 
 // OpenStreetMap baselayer

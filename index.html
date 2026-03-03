@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
     <title>Lost Grenadiers</title>
 
+    <link rel="icon" type="image/png" href="img/logo.jpg" />
+
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
 
@@ -16,7 +18,10 @@
 <body>
 <div id="app">
     <header>
-        <div class="logo">Lost Grenadiers</div>
+        <div class="logo">
+            <img src="img/grenadier.png" alt="grenadier" class="header-logo-icon">
+            <span>Lost Grenadiers</span>
+        </div>
         <div class="search-wrap">
             <input id="search" type="search" placeholder="Search building or room (e.g. LF 119)" aria-label="Search building or room" />
             <button id="searchBtn" aria-label="Search">Go</button>
@@ -125,21 +130,15 @@
     </main>
 </div>
 
-<!-- Leaflet JS
-Notes for backend integration points:
-- Replace 'buildings' dataset with an API call to /api/buildings (GET) that returns ids, names, and coordinates.
-- Implement /api/route (POST or GET) to return a JSON object like: {geometry: [[lat,lng],...], steps:[{text:...}, ...]}
-- Indoor floor plans should be delivered as tiled layers or GeoJSON polygons (use LayerGroup for floors).
-- trigger linguist
--->
+<!-- Leaflet JS -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <!-- Leaflet rotated image overlay plugin -->
 <script src="https://unpkg.com/leaflet-imageoverlay-rotated/Leaflet.ImageOverlay.Rotated.js"></script>
 
 <script src="js/mapInit.js"></script>
-<script src="js/utils.js"></script>
+<script type="module" src="js/utils.js"></script>
 <script src="js/buildings.js"></script>
-<script src="js/indoor.js"></script>
+<script type="module" src="js/indoor.js"></script>
 <script type="module" src="js/routingBridge.js"></script>
 <script type="module" src="js/ui.js"></script>
 
