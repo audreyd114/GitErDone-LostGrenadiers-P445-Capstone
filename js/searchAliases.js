@@ -63,16 +63,16 @@ export const searchAliases ={
     "computer science tutoring":{
         type: "room",
         value: ""
-    },
+    },*/
     // Math tutoring
     "math tutor":{
         type: "room",
-        value: ""
+        value: "US-203"
     },
     "math tutoring":{
         type: "room",
-        value: ""
-    },*/
+        value: "US-203"
+    },
     // Cafeteria
     "cafeteria":{
         type: "room",
