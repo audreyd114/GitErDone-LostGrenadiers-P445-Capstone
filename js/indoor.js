@@ -4,7 +4,6 @@ All indoor/floor overlay logic and indoor UI.
 */
 
 import {
-    handleIndoorModeActivated,
     handleFloorSelected,
     getActiveRouteEntryFloor
 } from "./routing.js";
@@ -137,15 +136,12 @@ indoorToggle.addEventListener("change", () => {
     floorPanel.style.display = indoorMode ? "block" : "none";
 
     if (indoorMode) {
-        handleIndoorModeActivated();
+        const routeEntryFloor = getActiveRouteEntryFloor();
 
-        if (indoorMode && currentBuilding) {
-            const routeEntryFloor = getActiveRouteEntryFloor();
-
-            if (routeEntryFloor) {
-                currentFloor = routeEntryFloor;
-                loadFloorOverlay(currentBuilding, currentFloor);
-            }
+        if (routeEntryFloor && currentBuilding) {
+            currentFloor = routeEntryFloor;
+            loadFloorOverlay(currentBuilding, currentFloor);
+            handleFloorSelected(currentFloor);
         }
     }
 

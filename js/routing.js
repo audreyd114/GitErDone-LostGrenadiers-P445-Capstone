@@ -164,9 +164,10 @@ export async function startRoute() {
     console.log("Entry floor:", entryFloor);
     console.log("Route minutes:", minutes);
 
+    /*
     if (entryFloor !== null && window.setIndoorFloor) {
         window.setIndoorFloor(entryFloor);
-    }
+    }*/
 
     /*activeRouteLine = L.polyline(fullGeometry, {
         weight: 6,
@@ -190,32 +191,21 @@ export function clearActiveRoute() {
         segmentToBuilding.remove();
         segmentToBuilding = null;
     }
-
-    if (segmentToStairs) {
-        segmentToStairs.remove();
-        segmentToStairs = null;
-    }
-
-    if (segmentFinal) {
-        segmentFinal.remove();
-        segmentFinal = null;
-    }
-
-    currentRouteSegments = null;
-
     if (activeIndoorPolyline) {
         map.removeLayer(activeIndoorPolyline);
         activeIndoorPolyline = null;
     }
-}
 
+    currentRouteSegments = null;
+}
+/*
 export function handleIndoorModeActivated() {
     if (!currentRouteSegments) return;
 
     const { routeToStairs, finalRouteSegment, entryFloor } = currentRouteSegments;
 
     drawIndoorSegment(entryFloor);
-}
+}*/
 
 export function handleFloorSelected(selectedFloor) {
     if (!currentRouteSegments) return;
@@ -226,7 +216,11 @@ export function handleFloorSelected(selectedFloor) {
 function drawIndoorSegment(selectedFloor) {
     if (!currentRouteSegments) return;
 
-    const { routeToStairs, finalRouteSegment, entryFloor } = currentRouteSegments;
+    const {
+        routeToStairs,
+        finalRouteSegment,
+        entryFloor
+    } = currentRouteSegments;
 
     // Always clear previous indoor line
     if (activeIndoorPolyline) {
@@ -236,19 +230,23 @@ function drawIndoorSegment(selectedFloor) {
 
     let segmentToDraw = [];
 
-    if (selectedFloor === entryFloor) {
-        // Entry floor
-        if (routeToStairs.length > 0) {
+    const hasStairs = routeToStairs.length > 0;
+
+    if (!hasStairs) {
+        // SAME FLOOR ROUTE
+        if (selectedFloor === entryFloor) {
+            segmentToDraw = finalRouteSegment;
+        }
+    } else {
+        // MULTI FLOOR ROUTE
+        if (selectedFloor === entryFloor) {
             segmentToDraw = routeToStairs;
         } else {
             segmentToDraw = finalRouteSegment;
         }
-    } else {
-        // Destination floor
-        segmentToDraw = finalRouteSegment;
     }
 
-    if (!segmentToDraw || segmentToDraw.length === 0) return;
+    if (!segmentToDraw.length) return;
 
     activeIndoorPolyline = L.polyline(
         segmentToDraw.map(p => [p.lat, p.lon]),
