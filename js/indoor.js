@@ -136,13 +136,8 @@ indoorToggle.addEventListener("change", () => {
     floorPanel.style.display = indoorMode ? "block" : "none";
 
     if (indoorMode) {
-        const routeEntryFloor = getActiveRouteEntryFloor();
-
-        if (routeEntryFloor && currentBuilding) {
-            currentFloor = routeEntryFloor;
-            loadFloorOverlay(currentBuilding, currentFloor);
-            handleFloorSelected(currentFloor);
-        }
+        clearIndoorOverlay();
+        currentBuilding = null;
     }
 
     if (!indoorMode) {
@@ -171,7 +166,7 @@ buildings.forEach(b => {
 
         const routeEntryFloor = getActiveRouteEntryFloor();
 
-        if (routeEntryFloor && floors.includes(routeEntryFloor)) {
+        if (routeEntryFloor !==null && floors.includes(routeEntryFloor)) {
             currentFloor = routeEntryFloor;
         } else {
             // Default behavior
