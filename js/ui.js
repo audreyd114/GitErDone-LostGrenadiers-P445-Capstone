@@ -11,13 +11,15 @@ import {
     clearPreviewRoute,
     clearActiveRoute,
     clearAllRoutes,
-    getLastRouteMeta
+    getLastRouteMeta,
+    getLastPreview
 } from './routing.js';
 import{
     startWatchingPosition,
     stopWatchingPosition,
     isTrackingPosition
 } from "./utils.js";
+import { searchAliases } from "./searchAliases.js";
 
 //Collapse nav pane toggle
 const controlPanel = document.getElementById("controlPanel");
@@ -92,6 +94,22 @@ function resolveBuildingCode(input) {
     return match ? match.id : null;
 }
 
+function resolveAlias(input) {
+    const normalized = input.trim().toLowerCase();
+
+    // Exact match
+    if (searchAliases[normalized]) {
+        return searchAliases[normalized];
+    }
+
+    // Partial match
+    const matchKey = Object.keys(searchAliases).find(key =>
+        normalized.includes(key)
+    );
+
+    return matchKey ? searchAliases[matchKey] : null;
+}
+
 searchBtn.addEventListener('click', async() => {
     const q = searchInput.value.trim();
     if (!q) return;
@@ -102,6 +120,38 @@ searchBtn.addEventListener('click', async() => {
     }
 
     const userLatLng = userMarker.getLatLng();
+
+    // Check aliases first
+    const aliasResult = resolveAlias(q);
+
+    if (aliasResult) {
+        const accessible = document.getElementById('accessibleToggle').checked;
+
+        // If alias is coordinates
+        if (aliasResult.type === "coordinates") {
+            await requestRoutePreview(
+                [userLatLng.lat, userLatLng.lng],
+                aliasResult.value, // pass lat/lng array
+                accessible,
+                true
+            );
+
+            showApproveRouteModal(q);
+            return;
+        }
+
+        // If alias is room
+        if (aliasResult.type === "room") {
+            await requestRoutePreview(
+                [userLatLng.lat, userLatLng.lng],
+                aliasResult.value,
+                accessible
+            );
+
+            showApproveRouteModal(aliasResult.value);
+            return;
+        }
+    }
 
     // Check if it's building + room input
     const roomMatch = q.match(/^([A-Za-z]{2})[\s-]?(\d{2,4})$/);
@@ -271,11 +321,14 @@ accessibleToggle.addEventListener("change", () => {
     console.log("Accessible mode:", accessibleToggle.checked);
 
     // If a preview is currently shown, regenerate it
-    if (window.lastPreviewData) {
+    const last = getLastPreview();
+
+    if (last) {
         requestRoutePreview(
-            window.lastPreviewData.fromLatLng,
-            window.lastPreviewData.room,
-            accessibleToggle.checked
+            last.fromLatLng,
+            last.destination,
+            accessibleToggle.checked,
+            last.isCoordinate
         );
     }
 });
