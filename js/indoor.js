@@ -290,3 +290,14 @@ function clearIndoorOverlay() {
     });
     currentOverlays = [];
 }
+
+window.activateIndoorModeForRoute = function(buildingId, floorNum) {
+    indoorMode = true;
+    indoorToggle.checked = true;
+    floorPanel.style.display = "block";
+
+    currentBuilding = buildingId;
+    currentFloor = floorNum;
+
+    loadFloorOverlay(buildingId, floorNum);
+};
