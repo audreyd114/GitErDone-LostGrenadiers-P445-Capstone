@@ -151,7 +151,8 @@ export async function startRoute() {
         routeToStairs,
         finalRouteSegment,
         entryFloor,
-        minutes
+        minutes,
+        destinationFloor
     };
 
     // Draw only outdoor segment first
