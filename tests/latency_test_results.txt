@@ -1,0 +1,56 @@
+smortz@neith:~$ ./test.sh 
+Running 50 tests...
+Request 1: 0.548190s
+Request 2: 0.375591s
+Request 3: 0.480510s
+Request 4: 0.376874s
+Request 5: 0.374973s
+Request 6: 0.383334s
+Request 7: 0.376231s
+Request 8: 0.274836s
+Request 9: 0.379248s
+Request 10: 0.478535s
+Request 11: 0.480929s
+Request 12: 0.378132s
+Request 13: 0.478399s
+Request 14: 0.270878s
+Request 15: 0.381671s
+Request 16: 0.372447s
+Request 17: 0.485207s
+Request 18: 0.474489s
+Request 19: 0.371854s
+Request 20: 0.381652s
+Request 21: 0.480151s
+Request 22: 0.469607s
+Request 23: 0.487748s
+Request 24: 0.477117s
+Request 25: 0.374631s
+Request 26: 0.352490s
+Request 27: 0.388487s
+Request 28: 0.378393s
+Request 29: 2.528627s
+Request 30: 0.482527s
+Request 31: 0.376626s
+Request 32: 0.282657s
+Request 33: 0.382395s
+Request 34: 0.478009s
+Request 35: 0.383459s
+Request 36: 0.377864s
+Request 37: 0.480745s
+Request 38: 0.481823s
+Request 39: 0.377083s
+Request 40: 0.480353s
+Request 41: 0.476326s
+Request 42: 0.588362s
+Request 43: 0.481235s
+Request 44: 0.381329s
+Request 45: 0.477615s
+Request 46: 0.480275s
+Request 47: 0.377356s
+Request 48: 0.482169s
+Request 49: 0.481261s
+Request 50: 0.479346s
+
+Observed Routing Response Time
+Average: < .46700092000000000000s
+Worst case tested: < 2.528627s
