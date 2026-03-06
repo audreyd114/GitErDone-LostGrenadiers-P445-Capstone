@@ -16,17 +16,17 @@ export const searchAliases ={
     "clock tower":{
         type: "coordinates",
         value: [38.3446104128296, -85.82002694874234]
-    },
+    },*/
     // Library
     "library":{
-        type: "coordinates",
-        value: [38.34371031591948, -85.82085282478349]
+        type: "room",
+        value: "LI-200"
     },
     // Book Store
     "book store":{
         type: "room",
-        value: ""
-    },
+        value: "US-007"
+    },/*
     // Fitness Center UC
     "fitness center uc":{
         type: "room",
@@ -73,10 +73,24 @@ export const searchAliases ={
         type: "room",
         value: "US-203"
     },
+    "math lab":{
+        type: "room",
+        value: "US-203"
+    },
     // Cafeteria
     "cafeteria":{
         type: "room",
         value: "UC-028"
+    },
+    // Hoosier room
+    "hoosier room":{
+        type: "room",
+        value: "UC-034"
+    },
+    // Business closet
+    "business closet":{
+        type: "room",
+        value: "US-107"
     }
     // Volleyball Courts
     /*"volleyball court":{
