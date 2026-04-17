@@ -12,14 +12,13 @@ import {
 let indoorMode = false;
 let currentFloor = 2;
 let currentBuilding = null;
-let currentOverlay = null;
+let currentOverlays = [];
 
 window.isIndoorMode = () => indoorMode;
 
 const unavailableFloors = {
     PS: [1],
     LI: [1, 2, 3, 4],
-    OG: [1, 2, 3, 4],
     US: [1, 2, 3, 4, 5],
     UC: [1, 2, 3, 4, 5]
 }
@@ -100,9 +99,9 @@ const imageAnchors = {
             bottomLeft: [38.34412528, -85.82096701]
         },
         5: {
-            topLeft: [38.34461096, -85.82089446],
-            topRight: [38.34452804, -85.82003091],
-            bottomLeft: [38.34412244, -85.82097062]
+            topLeft: [38.34460955, -85.82090683],
+            topRight: [38.34455573, -85.82024094],
+            bottomLeft: [38.34439934, -85.82093558]
         }
     },
     KV: {
@@ -120,6 +119,28 @@ const imageAnchors = {
             topLeft: [38.34740615, -85.82019197],
             topRight: [38.34732396, -85.81930581],
             bottomLeft: [38.34650315, -85.82032923]
+        }
+    },
+    OG: {
+        1: {
+            topLeft: [38.3475706, -85.8201612],
+            topRight: [38.3474368, -85.8184436],
+            bottomLeft: [38.3468156, -85.8202558]
+        },
+        2: {
+            topLeft: [38.3475008, -85.8200684],
+            topRight: [38.3473772, -85.8184547],
+            bottomLeft: [38.3467851, -85.8201686]
+        },
+        3: {
+            topLeft: [38.3475081, -85.8201000],
+            topRight: [38.3473713, -85.8184529],
+            bottomLeft: [38.3467895, -85.8201964]
+        },
+        4: {
+            topLeft: [38.3475459, -85.8201148],
+            topRight: [38.3473961, -85.8184083],
+            bottomLeft: [38.3467807, -85.8202168]
         }
     }
 }
@@ -202,29 +223,45 @@ document.querySelectorAll("#panelFloorSelector button").forEach(btn => {
 
 //Overlay loading
 async function loadFloorOverlay(buildingId, floorNum) {
-    console.log("loadFloorOverlay called:", buildingId, floorNum);
     clearIndoorOverlay();
 
-    const floorData = imageAnchors?.[buildingId]?.[floorNum];
-    if (!floorData) {
-        console.warn("No image anchors for", buildingId, "floor", floorNum);
-        return;
+    // Determine which overlays to load
+    let buildingsToLoad = [buildingId];
+
+    if (buildingId === "KV" || buildingId === "OG") {
+        buildingsToLoad = ["KV", "OG"];
     }
 
-    const { topLeft, topRight, bottomLeft } = floorData;
+    buildingsToLoad.forEach(id => {
 
-    const url = `/indoor/${buildingId}_floor${floorNum}.png`;
+        const floorData = imageAnchors?.[id]?.[floorNum];
+        if (!floorData) return;
 
-    currentOverlay = L.imageOverlay.rotated(
-        url,
-        topLeft,
-        topRight,
-        bottomLeft,
-        {
-            opacity: 0.95,
-            interactive: false
+        const { topLeft, topRight, bottomLeft } = floorData;
+
+        const url = `/indoor/${id}_floor${floorNum}.png`;
+
+        const overlay = L.imageOverlay.rotated(
+            url,
+            topLeft,
+            topRight,
+            bottomLeft,
+            {
+                opacity: 0.95,
+                interactive: false
+            }
+        ).addTo(map);
+
+        if (id === "OG") {
+            overlay.setZIndex(100);
         }
-    ).addTo(map);
+
+        if (id === "KV") {
+            overlay.setZIndex(200); // KV always on top
+        }
+
+        currentOverlays.push(overlay);
+    });
 }
 
 const floorModal = document.getElementById("floorUnavailableModal");
@@ -248,8 +285,19 @@ function showUnavailableFloorModal(buildingId, floorNum) {
 
 //cleanup
 function clearIndoorOverlay() {
-    if (currentOverlay) {
-        map.removeLayer(currentOverlay);
-        currentOverlay = null;
-    }
+    currentOverlays.forEach(overlay => {
+        map.removeLayer(overlay);
+    });
+    currentOverlays = [];
 }
+
+window.activateIndoorModeForRoute = function(buildingId, floorNum) {
+    indoorMode = true;
+    indoorToggle.checked = true;
+    floorPanel.style.display = "block";
+
+    currentBuilding = buildingId;
+    currentFloor = floorNum;
+
+    loadFloorOverlay(buildingId, floorNum);
+};

@@ -20,7 +20,7 @@ let currentRouteSegments = null;
 let activeIndoorPolyline = null;
 
 function parseRouteArray(routeArray) {
-    if (!Array.isArray(routeArray) || routeArray.length < 5) {
+    if (!Array.isArray(routeArray) || routeArray.length < 6) {
         console.error("Unexpected route array format:", routeArray);
         return null;
     }
@@ -30,7 +30,8 @@ function parseRouteArray(routeArray) {
         routeToStairs = [],
         finalRouteSegment = [],
         entryFloor = null,
-        minutes = null
+        minutes = null,
+        destinationFloor = null
     ] = routeArray;
 
     return {
@@ -38,18 +39,50 @@ function parseRouteArray(routeArray) {
         routeToStairs: Array.isArray(routeToStairs) ? routeToStairs : [],
         finalRouteSegment: Array.isArray(finalRouteSegment) ? finalRouteSegment : [],
         entryFloor: typeof entryFloor === "number" ? entryFloor : null,
-        minutes: typeof minutes === "number" ? minutes : null
+        minutes: typeof minutes === "number" ? minutes : null,
+        destinationFloor: typeof destinationFloor === "number" ? destinationFloor : null
     };
 }
 
 // route request as a PREVIEW. not active
-export async function requestRoutePreview(fromLatLng, room, accessibleMode) {
+export async function requestRoutePreview(fromLatLng, destination, accessibleMode, isCoordinate = false) {
     clearAllRoutes();
+
+    if (isCoordinate && Array.isArray(destination)) {
+        previewRouteLine = L.polyline(
+            [
+                [fromLatLng[0], fromLatLng[1]],
+                destination
+            ],
+            {
+                weight: 6,
+                color: '#2563eb',
+                opacity: 0.6,
+                dashArray: '6,8'
+            }
+        ).addTo(map);
+
+        map.fitBounds(previewRouteLine.getBounds(), {
+            padding: [80, 80],
+            maxZoom: 18
+        });
+
+        lastPreview = {
+            fromLatLng,
+            destination,
+            accessibleMode,
+            isCoordinate: true
+        };
+
+        lastRouteMeta = { entryFloor: null, minutes: null };
+
+        return;
+    }
 
     const data = await getFullRoute({
         lat: fromLatLng[0],
         lon: fromLatLng[1],
-        room,
+        room: destination,
         accessibleMode
     });
 
@@ -103,7 +136,7 @@ export async function requestRoutePreview(fromLatLng, room, accessibleMode) {
     });
 
 
-    lastPreview = {fromLatLng, room, accessibleMode};
+    lastPreview = {fromLatLng, destination, accessibleMode, isCoordinate: false};
 }
 
 // activate route
@@ -113,12 +146,26 @@ export async function startRoute() {
     clearPreviewRoute();
     clearActiveRoute();
 
-    const {fromLatLng, room, accessibleMode} = lastPreview;
+    const {fromLatLng, destination, accessibleMode, isCoordinate = false} = lastPreview;
+
+    // If coordinate-based route, just convert preview to active
+    if (isCoordinate && Array.isArray(destination)) {
+        activeRouteLine = L.polyline(
+            [
+                [fromLatLng[0], fromLatLng[1]],
+                destination
+            ],
+            { weight: 6, color: '#2563eb' }
+        ).addTo(map);
+
+        map.fitBounds(activeRouteLine.getBounds(), { padding: [40, 40] });
+        return;
+    }
 
     const data = await getFullRoute({
         lat: fromLatLng[0],
         lon: fromLatLng[1],
-        room,
+        room: destination,
         accessibleMode
     });
 
@@ -140,7 +187,8 @@ export async function startRoute() {
         routeToStairs,
         finalRouteSegment,
         entryFloor,
-        minutes
+        minutes,
+        destinationFloor
     } = parsed;
 
     currentRouteSegments = {
@@ -148,8 +196,21 @@ export async function startRoute() {
         routeToStairs,
         finalRouteSegment,
         entryFloor,
-        minutes
+        minutes,
+        destinationFloor
     };
+
+    if (entryFloor !== null && window.activateIndoorModeForRoute) {
+        // Derive buildingId from the room or by matching it in buildings.js
+        const buildingId = window.buildings.find(b =>
+            typeof destination === "string" && destination.startsWith(b.id)
+        )?.id;
+
+        if (buildingId) {
+            window.activateIndoorModeForRoute(buildingId, entryFloor);
+            handleFloorSelected(entryFloor); // show the indoor segment immediately
+        }
+    }
 
     // Draw only outdoor segment first
     if (routeToBuilding.length > 0) {
@@ -219,31 +280,37 @@ function drawIndoorSegment(selectedFloor) {
     const {
         routeToStairs,
         finalRouteSegment,
-        entryFloor
+        entryFloor,
+        destinationFloor
     } = currentRouteSegments;
 
-    // Always clear previous indoor line
     if (activeIndoorPolyline) {
         map.removeLayer(activeIndoorPolyline);
         activeIndoorPolyline = null;
     }
+
+    const selected = Number(selectedFloor);
+    const entry = Number(entryFloor);
+    const dest = Number(destinationFloor);
 
     let segmentToDraw = [];
 
     const hasStairs = routeToStairs.length > 0;
 
     if (!hasStairs) {
-        // SAME FLOOR ROUTE
-        if (selectedFloor === entryFloor) {
+        // Same-floor route
+        if (selected === entry) {
             segmentToDraw = finalRouteSegment;
         }
     } else {
-        // MULTI FLOOR ROUTE
-        if (selectedFloor === entryFloor) {
+        // Multi-floor route
+        if (selected === entry) {
             segmentToDraw = routeToStairs;
-        } else {
+        }
+        else if (selected === dest) {
             segmentToDraw = finalRouteSegment;
         }
+        // Any other floor, nothing
     }
 
     if (!segmentToDraw.length) return;
@@ -266,4 +333,8 @@ export function getLastRouteMeta() {
 
 export function getActiveRouteEntryFloor() {
     return currentRouteSegments?.entryFloor ?? null;
+}
+
+export function getLastPreview() {
+    return lastPreview;
 }
